@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { resolveNaturalLanguageIntent } from "@/lib/aevum/intentResolver";
+import { listAllRecipients } from "@/lib/recipients";
 
 export const dynamic = "force-dynamic";
 
@@ -12,7 +13,8 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: "prompt is required" }, { status: 400 });
     }
 
-    const resolved = resolveNaturalLanguageIntent(prompt, senderAccount);
+    const knownRecipients = await listAllRecipients();
+    const resolved = resolveNaturalLanguageIntent(prompt, senderAccount, knownRecipients);
 
     return NextResponse.json({
       success: true,

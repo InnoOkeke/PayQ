@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { aevumAi, AEVUM_AI_MODEL, AI_PROVIDER_NAME } from "@/lib/ai/aevumAi";
 import { prisma } from "@/lib/prisma";
 import { resolveNaturalLanguageIntent } from "@/lib/aevum/intentResolver";
-import { detectChainFromAddress } from "@/lib/recipients";
+import { detectChainFromAddress, listAllRecipients } from "@/lib/recipients";
 
 export async function POST(req: NextRequest) {
   try {
@@ -94,14 +94,25 @@ export async function POST(req: NextRequest) {
       lower.includes("transfer $");
 
     if (isPaymentIntent) {
-      const intent = resolveNaturalLanguageIntent(message, "company.aevum");
+      const knownRecipients = await listAllRecipients();
+      const intent = resolveNaturalLanguageIntent(message, "company.aevum", knownRecipients);
+
+      if (!intent.resolvedPayee.targetChainAddress) {
+        const reply =
+          `I couldn't find **${intent.recipientQuery}** in your QDay Aevum Recipients directory.\n\n` +
+          `For your safety (Confirmation of Payee), I will never guess an address. Please either:\n` +
+          `• Include their full \`0x...\` QDay Aevum address in your message, or\n` +
+          `• Register **${intent.recipientQuery}** in **Recipients** first.`;
+        return NextResponse.json({ reply, provider: AI_PROVIDER_NAME });
+      }
+
       const policyMsg = intent.policyCheck.autoExecutable
         ? "✓ Autonomous Treasury Approval: Payment is within PayQRegistry single-tx and 24h velocity limits."
         : `⚠ Security Policy Alert: ${intent.policyCheck.violations.join(", ") || "Requires Officer Review"}`;
 
       const reply = `**QDay Aevum Payment Intent Compiled**:\n\n` +
         `• **Network**: QDay Aevum Testnet (Chain ID 44005)\n` +
-        `• **Settlement Sum**: $${intent.extractedAmount.toFixed(2)} tUSD8\n` +
+        `• **Settlement Sum**: $${intent.extractedAmount.toFixed(2)} ${intent.extractedCurrency}\n` +
         `• **Payee**: ${intent.resolvedPayee.displayName}\n` +
         `• **Destination Address**: \`${intent.resolvedPayee.targetChainAddress}\`\n` +
         `• **Confirmation of Payee**: ${intent.resolvedPayee.verificationStatus} (Trust Score: ${intent.resolvedPayee.reputationScore}/100)\n` +

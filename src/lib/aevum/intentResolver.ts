@@ -1,8 +1,9 @@
 /**
  * Conversational Natural Language Intent Resolver for QDay Aevum Testnet
  *
- * Translates human prompts (e.g. "Pay Acme Design 50 tUSD8 on Aevum")
- * into verifiable Aevum payment intents with Confirmation of Payee and Treasury Policy evaluation.
+ * Translates human prompts (e.g. "Pay polimaf 50 tUSD8") into verifiable
+ * Aevum payment intents using the live Recipients directory (Neon DB)
+ * and Treasury Policy evaluation.
  */
 
 import {
@@ -10,6 +11,7 @@ import {
   calculateReputationScore,
   DEFAULT_TREASURY_POLICY,
 } from "@/lib/treasury/policyEngine";
+import type { CounterpartyRecord } from "@/lib/recipients";
 
 export interface ResolvedIntent {
   rawPrompt: string;
@@ -39,44 +41,33 @@ export interface ResolvedIntent {
   };
 }
 
-const DIRECTORY_COUNTERPARTIES = [
-  {
-    displayName: "LeProf Consulting",
-    paymentId: "leprof",
-    evmAddress: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
-    verificationStatus: "VERIFIED" as const,
-    isOfficialPartner: true,
-    transactionCount: 19,
-  },
-  {
-    displayName: "Acme Web3 Design Studio",
-    paymentId: "acme-design",
-    evmAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-    verificationStatus: "VERIFIED" as const,
-    isOfficialPartner: true,
-    transactionCount: 14,
-  },
-  {
-    displayName: "Satoshi Freelance Engineering",
-    paymentId: "satoshi-dev",
-    evmAddress: "0x1234567890123456789012345678901234567890",
-    verificationStatus: "VERIFIED" as const,
-    isOfficialPartner: false,
-    transactionCount: 8,
-  },
-  {
-    displayName: "John Kennedy",
-    paymentId: "john-kennedy",
-    evmAddress: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
-    verificationStatus: "VERIFIED" as const,
-    isOfficialPartner: true,
-    transactionCount: 8,
-  },
-];
+function extractRecipientQuery(clean: string): string {
+  // 1. Direct 0x EVM address in prompt
+  const evmMatch = clean.match(/0x[a-fA-F0-9]{40}/);
+  if (evmMatch) return evmMatch[0];
+
+  // 2. "to <recipient>" (e.g. "send money to polimaf", "send 50 tUSD8 to polimaf")
+  const toMatch = clean.match(/\bto\s+([a-zA-Z0-9._-]+(?:\s+[a-zA-Z0-9._-]+)?)/i);
+  if (toMatch) {
+    return toMatch[1].replace(/\s+(?:on|for|with|via)\b.*$/i, "").trim();
+  }
+
+  // 3. "pay <recipient> <amount>"
+  const payMatch = clean.match(/\bpay\s+([a-zA-Z0-9._-]+(?:\s+[a-zA-Z0-9._-]+)?)/i);
+  if (payMatch) {
+    const candidate = payMatch[1].replace(/\s+\d.*$/, "").trim();
+    if (candidate && !/^\d/.test(candidate)) {
+      return candidate;
+    }
+  }
+
+  return "";
+}
 
 export function resolveNaturalLanguageIntent(
   prompt: string,
-  senderAccount: string = "0x0000000000000000000000000000000000000000"
+  senderAccount: string = "0x0000000000000000000000000000000000000000",
+  knownRecipients: CounterpartyRecord[] = []
 ): ResolvedIntent {
   const clean = prompt.trim();
   const lower = clean.toLowerCase();
@@ -85,43 +76,50 @@ export function resolveNaturalLanguageIntent(
   let extractedCurrency = "tUSD8";
 
   const amountMatch = clean.match(
-    /(?:\$|usd\s*|tusd8\s*|tqday\s*)?(\d+(?:\.\d{1,2})?)\s*(tusd8|tqday|usd|usdc|\$)?/i
+    /(?:\$|usd\s*|tusd8\s*|tqday\s*)?(\d+(?:\.\d{1,2})?)\s*(tusd8|tqday|usd|\$)?/i
   );
   if (amountMatch) {
     extractedAmount = parseFloat(amountMatch[1]);
     extractedCurrency = lower.includes("tqday") ? "tQDAY" : "tUSD8";
   }
 
-  let recipientQuery = "Acme Web3 Design Studio";
-  if (lower.includes("leprof")) {
-    recipientQuery = "LeProf Consulting";
-  } else if (lower.includes("acme")) {
-    recipientQuery = "Acme Web3 Design Studio";
-  } else if (lower.includes("satoshi")) {
-    recipientQuery = "Satoshi Freelance Engineering";
-  } else if (lower.includes("john") || lower.includes("kennedy")) {
-    recipientQuery = "John Kennedy";
-  } else {
-    const toMatch = clean.match(/(?:to|pay)\s+([a-zA-Z0-9-_\.]+)/i);
-    if (toMatch) {
-      recipientQuery = toMatch[1];
-    }
+  const recipientQuery = extractRecipientQuery(clean);
+  const queryLower = recipientQuery.toLowerCase();
+
+  // Match against real Recipients directory (displayName, paymentId handle, or 0x walletAddress)
+  let matched: CounterpartyRecord | undefined;
+  if (queryLower) {
+    matched = knownRecipients.find(
+      (r) =>
+        r.walletAddress.toLowerCase() === queryLower ||
+        r.paymentId.toLowerCase() === queryLower ||
+        r.displayName.toLowerCase() === queryLower ||
+        r.displayName.toLowerCase().includes(queryLower) ||
+        r.paymentId.toLowerCase().includes(queryLower)
+    );
   }
 
-  const matched = DIRECTORY_COUNTERPARTIES.find(
-    (c) =>
-      c.displayName.toLowerCase().includes(recipientQuery.toLowerCase()) ||
-      c.paymentId.toLowerCase().includes(recipientQuery.toLowerCase()) ||
-      c.evmAddress.toLowerCase() === recipientQuery.toLowerCase()
-  );
+  // Fallback: check if any recipient's name or paymentId appears anywhere in the prompt
+  if (!matched) {
+    matched = knownRecipients.find(
+      (r) =>
+        lower.includes(r.paymentId.toLowerCase()) ||
+        lower.includes(r.displayName.toLowerCase()) ||
+        lower.includes(r.walletAddress.toLowerCase())
+    );
+  }
+
+  const isDirectAddress = /^0x[a-fA-F0-9]{40}$/.test(recipientQuery);
+  const targetChainAddress =
+    matched?.walletAddress || (isDirectAddress ? recipientQuery : "");
 
   const verificationStatus = matched ? matched.verificationStatus : "UNVERIFIED";
-  const reputationScore = matched ? calculateReputationScore(matched) : 35;
-  const targetChainAddress =
-    matched?.evmAddress ||
-    (/^0x[a-fA-F0-9]{40}$/.test(recipientQuery)
-      ? recipientQuery
-      : "0x742d35Cc6634C0532925a3b844Bc454e4438f44e");
+  const reputationScore = matched
+    ? calculateReputationScore({
+        verificationStatus: matched.verificationStatus,
+        isOfficialPartner: matched.verificationStatus === "VERIFIED",
+      })
+    : 35;
 
   const policyCheck = evaluatePaymentAgainstPolicy(
     extractedAmount,
@@ -129,18 +127,26 @@ export function resolveNaturalLanguageIntent(
     reputationScore,
     verificationStatus,
     DEFAULT_TREASURY_POLICY,
-    180
+    0,
+    targetChainAddress || "0x0000000000000000000000000000000000000000",
+    senderAccount
   );
+
+  if (!targetChainAddress) {
+    policyCheck.warnings.push(
+      `Recipient "${recipientQuery || "unknown"}" was not found in your Recipients directory.`
+    );
+  }
 
   return {
     rawPrompt: prompt,
     extractedAmount,
     extractedCurrency,
-    recipientQuery,
+    recipientQuery: matched?.displayName || recipientQuery || "Unknown Recipient",
     targetChain: "QDay Aevum Testnet",
     memo: `Aevum Settlement: ${prompt}`,
     resolvedPayee: {
-      displayName: matched?.displayName || recipientQuery,
+      displayName: matched?.displayName || recipientQuery || "Unregistered Payee",
       accountId: targetChainAddress,
       targetChainAddress,
       verificationStatus,
