@@ -285,7 +285,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const txHash = await writeContractAsync({
         address: registryAddr,
         abi: PAYQ_REGISTRY_ABI,
-        functionName: "updateGuardrails",
+        functionName: "updateMyGuardrails",
         args: [
           parseUnits(String(maxSingleTxTusd8), AEVUM_CONFIG.tusd8Decimals),
           parseUnits(String(dailyCapTusd8), AEVUM_CONFIG.tusd8Decimals),
@@ -310,7 +310,7 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
       const txHash = await writeContractAsync({
         address: registryAddr,
         abi: PAYQ_REGISTRY_ABI,
-        functionName: "setPaused",
+        functionName: "setMyPaused",
         args: [paused],
         chainId: AEVUM_CHAIN_ID,
       });

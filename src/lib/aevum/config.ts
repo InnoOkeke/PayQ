@@ -41,7 +41,7 @@ export const AEVUM_CONFIG = {
   nativeSymbol: "tQDAY",
   nativeDecimals: 18,
   payqRegistryAddress: (process.env.NEXT_PUBLIC_PAYQ_REGISTRY_ADDRESS ||
-    "0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21") as `0x${string}` | "",
+    "0xD64086b23C7d4499C0FD7524a47E404994097BA0") as `0x${string}` | "",
 };
 
 export const ERC20_ABI = parseAbi([
@@ -57,6 +57,9 @@ export const PAYQ_REGISTRY_ABI = parseAbi([
   "function registerPayee(address payee, string legalName, string paymentId)",
   "function verifyPayee(address payee, string expectedName) view returns (string status, string registeredName, uint8 trustScore)",
   "function payInvoice(address payee, uint256 amount, string invoiceRef, string expectedName)",
+  "function getGuardrails(address wallet) view returns (uint256 _maxSingleTxAmount, uint256 _dailyVelocityCap, bool _paused, bool _configured)",
+  "function updateMyGuardrails(uint256 _maxSingleTxAmount, uint256 _dailyVelocityCap, bool _paused)",
+  "function setMyPaused(bool _paused)",
   "function updateGuardrails(uint256 _maxSingleTxAmount, uint256 _dailyVelocityCap, bool _paused)",
   "function setPaused(bool _paused)",
   "function maxSingleTxAmount() view returns (uint256)",

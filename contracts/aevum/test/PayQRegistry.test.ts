@@ -78,4 +78,42 @@ describe("PayQRegistry", function () {
         .payInvoice(payee.address, ethers.parseUnits("10", 6), "INV-3", "Acme Web3 Design")
     ).to.be.revertedWithCustomError(registry, "ContractPaused");
   });
+
+  it("allows any connected wallet to configure and enforce its own guardrails", async function () {
+    const { payer, payee, attacker, registry } = await deployFixture();
+    await registry.registerPayee(payee.address, "Acme Web3 Design", "acme-design");
+
+    // Non-owner wallet sets its own custom guardrails (maxSingle = 50 tUSD8, dailyCap = 100 tUSD8)
+    await registry
+      .connect(payer)
+      .updateMyGuardrails(ethers.parseUnits("50", 6), ethers.parseUnits("100", 6), false);
+
+    const [maxSingle, dailyCap, isPaused, configured] = await registry.getGuardrails(payer.address);
+    expect(maxSingle).to.equal(ethers.parseUnits("50", 6));
+    expect(dailyCap).to.equal(ethers.parseUnits("100", 6));
+    expect(isPaused).to.equal(false);
+    expect(configured).to.equal(true);
+
+    // Other wallets still use global defaults (500 tUSD8 / 2500 tUSD8)
+    const [otherMax, otherCap, otherPaused, otherConfigured] = await registry.getGuardrails(attacker.address);
+    expect(otherMax).to.equal(ethers.parseUnits("500", 6));
+    expect(otherCap).to.equal(ethers.parseUnits("2500", 6));
+    expect(otherPaused).to.equal(false);
+    expect(otherConfigured).to.equal(false);
+
+    // Payer's 60 tUSD8 payment is blocked by payer's custom 50 tUSD8 limit
+    await expect(
+      registry
+        .connect(payer)
+        .payInvoice(payee.address, ethers.parseUnits("60", 6), "INV-CUSTOM-1", "Acme Web3 Design")
+    ).to.be.revertedWithCustomError(registry, "ExceedsSingleTxLimit");
+
+    // Payer toggles its own killswitch
+    await registry.connect(payer).setMyPaused(true);
+    await expect(
+      registry
+        .connect(payer)
+        .payInvoice(payee.address, ethers.parseUnits("10", 6), "INV-CUSTOM-2", "Acme Web3 Design")
+    ).to.be.revertedWithCustomError(registry, "ContractPaused");
+  });
 });

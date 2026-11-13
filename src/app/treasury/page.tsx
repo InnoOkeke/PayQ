@@ -49,6 +49,7 @@ export default function TreasuryPage() {
   const [autoApproveUnder, setAutoApproveUnder] = useState(DEFAULT_TREASURY_POLICY.autoApproveVerifiedUnderUSD);
   const [killswitch, setKillswitch] = useState(false);
   const [contractOwner, setContractOwner] = useState<string | null>(null);
+  const [isCustomPolicy, setIsCustomPolicy] = useState(false);
   const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [sputnikSuccess, setSputnikSuccess] = useState<string | null>(null);
@@ -68,22 +69,19 @@ export default function TreasuryPage() {
     async function loadOnChainGuardrails() {
       setPolicyLoading(true);
       try {
-        const [onChainMax, onChainCap, onChainPaused, onChainOwner] = await Promise.all([
+        const targetWallet = (
+          accountId && accountId.startsWith("0x")
+            ? accountId
+            : "0x0000000000000000000000000000000000000000"
+        ) as `0x${string}`;
+
+        const [guardrailsResult, onChainOwner] = await Promise.all([
           aevumClient.readContract({
             address: registryAddr as `0x${string}`,
             abi: PAYQ_REGISTRY_ABI,
-            functionName: "maxSingleTxAmount",
-          }) as Promise<bigint>,
-          aevumClient.readContract({
-            address: registryAddr as `0x${string}`,
-            abi: PAYQ_REGISTRY_ABI,
-            functionName: "dailyVelocityCap",
-          }) as Promise<bigint>,
-          aevumClient.readContract({
-            address: registryAddr as `0x${string}`,
-            abi: PAYQ_REGISTRY_ABI,
-            functionName: "paused",
-          }) as Promise<boolean>,
+            functionName: "getGuardrails",
+            args: [targetWallet],
+          }) as Promise<[bigint, bigint, boolean, boolean]>,
           aevumClient.readContract({
             address: registryAddr as `0x${string}`,
             abi: PAYQ_REGISTRY_ABI,
@@ -92,9 +90,11 @@ export default function TreasuryPage() {
         ]);
 
         if (cancelled) return;
+        const [onChainMax, onChainCap, onChainPaused, configured] = guardrailsResult;
         setMaxSingleTx(Number(formatUnits(onChainMax, AEVUM_CONFIG.tusd8Decimals)));
         setDailyCap(Number(formatUnits(onChainCap, AEVUM_CONFIG.tusd8Decimals)));
         setKillswitch(onChainPaused);
+        setIsCustomPolicy(configured);
         setContractOwner(onChainOwner);
 
         if (accountId && accountId.startsWith("0x")) {
@@ -107,6 +107,8 @@ export default function TreasuryPage() {
           if (!cancelled) {
             setSpentTodayUSD(Number(formatUnits(spent, AEVUM_CONFIG.tusd8Decimals)));
           }
+        } else {
+          setSpentTodayUSD(0);
         }
       } catch (err) {
         console.warn("Failed to read PayQRegistry on-chain guardrails:", err);
@@ -175,6 +177,7 @@ export default function TreasuryPage() {
       const txHash = await updateGuardrailsOnChain(maxSingleTx, dailyCap, killswitch);
       if (txHash) {
         setLastTxHash(txHash);
+        setIsCustomPolicy(true);
       }
       setSavedSuccess(true);
       setTimeout(() => setSavedSuccess(false), 3500);
@@ -182,7 +185,7 @@ export default function TreasuryPage() {
       setPolicyError(
         err?.shortMessage ||
           err?.message ||
-          "On-chain updateGuardrails failed (only the PayQRegistry owner can update contract limits)."
+          "On-chain updateMyGuardrails failed. Please confirm the transaction in your wallet."
       );
     } finally {
       setSavingPolicy(false);
@@ -207,7 +210,7 @@ export default function TreasuryPage() {
       setPolicyError(
         err?.shortMessage ||
           err?.message ||
-          "On-chain setPaused failed (only the PayQRegistry owner can toggle the emergency pause)."
+          "On-chain setMyPaused failed. Please confirm the transaction in your wallet."
       );
     }
   };
@@ -243,10 +246,10 @@ export default function TreasuryPage() {
             Treasury Guardrails &amp; Security Policy Engine
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Live limits enforced on-chain by PayQRegistry.sol on QDay Aevum Testnet (Chain ID 44005).
-            {contractOwner && (
-              <span className="ml-2 font-mono text-[11px] text-slate-500">
-                Owner: {contractOwner.slice(0, 6)}...{contractOwner.slice(-4)}
+            Multi-wallet on-chain guardrails enforced by PayQRegistry.sol on QDay Aevum Testnet (Chain ID 44005).
+            {accountId && (
+              <span className="ml-2 font-mono text-[11px] text-emerald-400">
+                {isCustomPolicy ? "Custom Wallet Policy Active" : "Using Default Policy (Save to Customize)"}
               </span>
             )}
           </p>

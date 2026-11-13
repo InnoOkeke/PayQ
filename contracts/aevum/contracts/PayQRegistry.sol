@@ -32,11 +32,21 @@ contract PayQRegistry is Ownable, ReentrancyGuard {
 
     IERC20 public immutable tusd8;
 
-    // Treasury Guardrails (in tUSD8 base units, 6 decimals)
+    // Treasury Guardrails (default values in tUSD8 base units, 6 decimals)
     uint256 public maxSingleTxAmount = 500 * 1e6; // 500 tUSD8
     uint256 public dailyVelocityCap = 2500 * 1e6; // 2,500 tUSD8
     uint256 public warningCooldown = 24 hours;
     bool public paused;
+
+    struct TreasuryPolicy {
+        uint256 maxSingleTxAmount;
+        uint256 dailyVelocityCap;
+        bool paused;
+        bool configured;
+    }
+
+    // Per-wallet Treasury Guardrails (any connected wallet can configure its own)
+    mapping(address => TreasuryPolicy) public walletPolicies;
 
     // Rolling 24h window tracking per sender
     mapping(address => uint256) public windowStart;
@@ -67,6 +77,12 @@ contract PayQRegistry is Ownable, ReentrancyGuard {
         uint256 timestamp
     );
     event GuardrailsUpdated(
+        uint256 maxSingleTxAmount,
+        uint256 dailyVelocityCap,
+        bool paused
+    );
+    event WalletGuardrailsUpdated(
+        address indexed wallet,
         uint256 maxSingleTxAmount,
         uint256 dailyVelocityCap,
         bool paused
@@ -169,7 +185,7 @@ contract PayQRegistry is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice Settle an invoice in tUSD8 with on-chain CoP and Treasury Guardrail enforcement.
+     * @notice Settle an invoice in tUSD8 with on-chain CoP and per-wallet Treasury Guardrail enforcement.
      */
     function payInvoice(
         address payee,
@@ -178,8 +194,15 @@ contract PayQRegistry is Ownable, ReentrancyGuard {
         string calldata expectedName
     ) external nonReentrant whenNotPaused {
         if (payee == address(0)) revert InvalidAddress();
-        if (amount > maxSingleTxAmount) {
-            revert ExceedsSingleTxLimit(amount, maxSingleTxAmount);
+        (
+            uint256 activeMaxSingleTx,
+            uint256 activeDailyCap,
+            bool walletPaused,
+        ) = getGuardrails(msg.sender);
+
+        if (walletPaused) revert ContractPaused();
+        if (amount > activeMaxSingleTx) {
+            revert ExceedsSingleTxLimit(amount, activeMaxSingleTx);
         }
 
         // Enforce rolling 24h velocity cap
@@ -188,8 +211,8 @@ contract PayQRegistry is Ownable, ReentrancyGuard {
             windowSpent[msg.sender] = 0;
         }
         uint256 projected = windowSpent[msg.sender] + amount;
-        if (projected > dailyVelocityCap) {
-            revert ExceedsDailyVelocityCap(projected, dailyVelocityCap);
+        if (projected > activeDailyCap) {
+            revert ExceedsDailyVelocityCap(projected, activeDailyCap);
         }
 
         // Enforce Confirmation of Payee if expectedName is supplied and payee is registered
@@ -204,6 +227,74 @@ contract PayQRegistry is Ownable, ReentrancyGuard {
         tusd8.safeTransferFrom(msg.sender, payee, amount);
 
         emit InvoiceSettled(msg.sender, payee, amount, invoiceRef, block.timestamp);
+    }
+
+    /**
+     * @notice Read the effective guardrails for any wallet (custom if configured, else global defaults).
+     */
+    function getGuardrails(
+        address wallet
+    )
+        public
+        view
+        returns (
+            uint256 _maxSingleTxAmount,
+            uint256 _dailyVelocityCap,
+            bool _paused,
+            bool _configured
+        )
+    {
+        TreasuryPolicy memory policy = walletPolicies[wallet];
+        if (policy.configured) {
+            return (
+                policy.maxSingleTxAmount,
+                policy.dailyVelocityCap,
+                policy.paused,
+                true
+            );
+        }
+        return (maxSingleTxAmount, dailyVelocityCap, paused, false);
+    }
+
+    /**
+     * @notice Any connected wallet can configure its own on-chain Treasury Guardrails.
+     */
+    function updateMyGuardrails(
+        uint256 _maxSingleTxAmount,
+        uint256 _dailyVelocityCap,
+        bool _paused
+    ) external {
+        walletPolicies[msg.sender] = TreasuryPolicy({
+            maxSingleTxAmount: _maxSingleTxAmount,
+            dailyVelocityCap: _dailyVelocityCap,
+            paused: _paused,
+            configured: true
+        });
+        emit WalletGuardrailsUpdated(
+            msg.sender,
+            _maxSingleTxAmount,
+            _dailyVelocityCap,
+            _paused
+        );
+    }
+
+    /**
+     * @notice Any connected wallet can toggle its own on-chain emergency killswitch.
+     */
+    function setMyPaused(bool _paused) external {
+        TreasuryPolicy storage policy = walletPolicies[msg.sender];
+        if (!policy.configured) {
+            policy.maxSingleTxAmount = maxSingleTxAmount;
+            policy.dailyVelocityCap = dailyVelocityCap;
+            policy.configured = true;
+        }
+        policy.paused = _paused;
+        emit WalletGuardrailsUpdated(
+            msg.sender,
+            policy.maxSingleTxAmount,
+            policy.dailyVelocityCap,
+            _paused
+        );
     }
 
     function updateGuardrails(

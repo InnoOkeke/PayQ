@@ -22,66 +22,7 @@ declare global {
   var __PayQ_recipients: CounterpartyRecord[] | undefined;
 }
 
-const DEFAULT_RECIPIENTS: CounterpartyRecord[] = [
-  {
-    id: "rec-acme-1",
-    displayName: "Acme Web3 Design Studio",
-    paymentId: "acme-design",
-    walletAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-    evmAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-    bitcoinAddress: "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh",
-    solanaAddress: "Acme482kXz9vQ7wPzN9bL1m9k6qR8s2vY5t1u4w3x2z1",
-    xrpAddress: "rEb8TK3gBgk5auZyyb6BiZN2rk3bU26GLq",
-    cosmosAddress: "cosmos1depduwvh4572h7w54cv92z567l523mvhz738q9",
-    stacksAddress: "SP2J6ZY48GV1EZ5V2V5RB9MP66SW86PYKKNRV9EJ7",
-    stellarAddress: "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
-    verificationStatus: "VERIFIED",
-    notes: "Official QDay Aevum Design Partner. tUSD8 corporate treasury.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "rec-satoshi-2",
-    displayName: "Satoshi Freelance Engineering",
-    paymentId: "satoshi-dev",
-    walletAddress: "0x1234567890123456789012345678901234567890",
-    evmAddress: "0x1234567890123456789012345678901234567890",
-    bitcoinAddress: "bc1q9d784a0c849e89d6e872c3d5236894c2518e91",
-    solanaAddress: "Satosh19428571829471928471928471928471928471",
-    xrpAddress: "rLNaPoKeeBjZe2qs6x52yVPZpZ8td4dc6w",
-    cosmosAddress: "cosmos1vl9e25dkls8923mxc78dfhk235689123456789",
-    stacksAddress: "SP3FBR2AGK5H9QBDH3EEN6DF8EK8JY7RX8QJ5SVTE",
-    stellarAddress: "GCKFBEIYV2U22IO2GUOWGOQUM76ACQOMZBPZFDB2O7AFB9M72G8K7KNA",
-    verificationStatus: "VERIFIED",
-    notes: "Post-quantum Solidity & EVM systems auditor on QDay Aevum.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "rec-apex-3",
-    displayName: "Apex Media Agency",
-    paymentId: "apex-media",
-    walletAddress: "0x9999999999999999999999999999999999999999",
-    evmAddress: "0x9999999999999999999999999999999999999999",
-    verificationStatus: "WARNING",
-    notes: "Recent key rotation reported by payee. Exercise caution.",
-    createdAt: new Date().toISOString(),
-  },
-  {
-    id: "rec-leprof-4",
-    displayName: "LeProf Consulting",
-    paymentId: "leprof",
-    walletAddress: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
-    evmAddress: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
-    bitcoinAddress: "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
-    solanaAddress: "7xKXtg2CW87d97TXJSDpbD5jBkheTqA83TZRuJosgAsU",
-    xrpAddress: "r9cZA1mLK5R5Am25ArfXFmqgNwjZgnfk59",
-    cosmosAddress: "cosmos1hsk6jryyqjfhp5dhc55tc9jtckygx0e846pc54",
-    stacksAddress: "SP1P72Z3704VMT3DMHPP2CB8TGQWGDBHD3RPR9GZS",
-    stellarAddress: "GDQP2KPQGKIHYJGXNUIYOMHARUARCA7DJT5FO2FFOOKY3B2WSQHG4W37",
-    verificationStatus: "VERIFIED",
-    notes: "Attested corporate counterparty on QDay Aevum Testnet (tUSD8).",
-    createdAt: new Date().toISOString(),
-  },
-];
+const DEFAULT_RECIPIENTS: CounterpartyRecord[] = [];
 
 function getStore(): CounterpartyRecord[] {
   if (!globalThis.__PayQ_recipients) {

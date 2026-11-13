@@ -37,18 +37,16 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    let cleanWallet = walletAddress.trim().toLowerCase();
-    // Auto-fix typo .tesnet -> .testnet if user entered it
-    if (cleanWallet.endsWith(".tesnet")) {
-      cleanWallet = cleanWallet.replace(/\.tesnet$/, ".testnet");
-    }
-
-    if (!cleanWallet.includes(".") && !cleanWallet.startsWith("0x")) {
-      cleanWallet = `${cleanWallet}.testnet`;
+    const cleanWallet = walletAddress.trim();
+    if (!/^0x[a-fA-F0-9]{40}$/.test(cleanWallet)) {
+      return NextResponse.json(
+        { error: "Please enter a valid QDay Aevum 0x wallet address (42 characters)." },
+        { status: 400 }
+      );
     }
 
     if (!paymentId) {
-      paymentId = cleanWallet.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "");
+      paymentId = cleanWallet.slice(0, 10).toLowerCase();
     }
 
     let cleanEvm = evmAddress?.trim();
