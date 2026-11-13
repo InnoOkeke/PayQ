@@ -85,39 +85,28 @@ export async function POST(req: NextRequest) {
     }
 
     // Check if the user is expressing a conversational payment intent
-    const isPaymentIntent = 
-      /^(send|pay|transfer|disburse|bridge)\b/i.test(lower) ||
-      /\b(send|pay|transfer|disburse)\s+(\$?\d+|\d+\s*(tUSD8|usdc|eth|btc|stx|sol|xrp|atom|xlm)?)/i.test(lower) ||
-      /\b(on\s+(base|ethereum|eth|arbitrum|solana|stacks|bitcoin|btc|ripple|xrp|cosmos|stellar|tUSD8))\b/i.test(lower) ||
+    const isPaymentIntent =
+      /^(send|pay|transfer|disburse)\b/i.test(lower) ||
+      /\b(send|pay|transfer|disburse)\s+(\$?\d+|\d+\s*(tUSD8|tqday|usd)?)/i.test(lower) ||
+      /\b0x[a-f0-9]{40}\b/i.test(lower) ||
       lower.includes("send $") ||
       lower.includes("pay $") ||
-      lower.includes("transfer $") ||
-      lower.includes("pay acme") ||
-      lower.includes("pay leprof") ||
-      lower.includes("pay satoshi") ||
-      lower.includes("on base") ||
-      lower.includes("on stacks") ||
-      lower.includes("on solana") ||
-      lower.includes("on bitcoin") ||
-      lower.includes("on xrp") ||
-      lower.includes("on cosmos") ||
-      lower.includes("on stellar") ||
-      lower.includes("on eth");
+      lower.includes("transfer $");
 
     if (isPaymentIntent) {
-      const intent = resolveNaturalLanguageIntent(message, "company.tUSD8");
+      const intent = resolveNaturalLanguageIntent(message, "company.aevum");
       const policyMsg = intent.policyCheck.autoExecutable
-        ? "✓ Autonomous Treasury Approval: Payment is within policy threshold ($250 USD) and daily velocity limits."
-        : `⚠ Security Policy Alert: ${intent.policyCheck.violations.join(", ") || "Requires Human Signoff"}`;
+        ? "✓ Autonomous Treasury Approval: Payment is within PayQRegistry single-tx and 24h velocity limits."
+        : `⚠ Security Policy Alert: ${intent.policyCheck.violations.join(", ") || "Requires Officer Review"}`;
 
-      const reply = `**tUSD8 Cross-Chain Intent Compiled**:\n\n` +
-        `• **Target Chain**: ${intent.targetChain} (${intent.settlementExecution.settlementRail})\n` +
-        `• **Settlement Sum**: $${intent.extractedAmount.toFixed(2)} ${intent.extractedCurrency}\n` +
+      const reply = `**QDay Aevum Payment Intent Compiled**:\n\n` +
+        `• **Network**: QDay Aevum Testnet (Chain ID 44005)\n` +
+        `• **Settlement Sum**: $${intent.extractedAmount.toFixed(2)} tUSD8\n` +
         `• **Payee**: ${intent.resolvedPayee.displayName}\n` +
         `• **Destination Address**: \`${intent.resolvedPayee.targetChainAddress}\`\n` +
         `• **Confirmation of Payee**: ${intent.resolvedPayee.verificationStatus} (Trust Score: ${intent.resolvedPayee.reputationScore}/100)\n` +
         `• **Treasury Guardrail**: ${policyMsg}\n\n` +
-        `Click **Apply & Pay Now** below to authorize this payment directly from your tUSD8 wallet.`;
+        `Click **Apply & Pay Now** below to open the Pay terminal pre-filled and sign with your connected EVM wallet.`;
 
       return NextResponse.json({ reply, intent, provider: AI_PROVIDER_NAME });
     }
@@ -129,18 +118,16 @@ export async function POST(req: NextRequest) {
       prisma.recipient.findMany({ take: 5 }),
     ]);
 
-    const systemPrompt = `You are PayQ Copilot, a senior Web3 fintech assistant running on PayQ AI Cloud and QDay Aevum.
+    const systemPrompt = `You are PayQ Copilot, a senior Web3 fintech assistant for PayQ on QDay Aevum Testnet.
 Platform Details:
-- Blockchain: QDay Aevum (QDay Aevum Testnet, RPC: https://rpc-test.qday.info)
-- AI Inference Engine: PayQ AI Cloud (api.PayQ AI)
-- Settlement Tokens: tUSD8 (native token, 24 decimals) and USDC (NEP-141 token, 6 decimals)
-- Explorer: https://testnet.Aevum Explorer.io
-- Wallet & Faucet: https://testnet.MetaMask / EVM Wallet.com
-- Identity Feature: Confirmation of Payee for human-readable named accounts (*.testnet, *.tUSD8) to prevent address spoofing and typos.
-- Multi-Chain Abstraction: 8 supported destination chains including tUSD8, Base, Ethereum, Arbitrum, Bitcoin (Native), Solana, Ripple (XRP), Cosmos Hub, Stacks (Bitcoin L2), and Stellar.
-- Settlement Rails: Model A (Intent-driven Solver bridge for external wallets) and Model B (tUSD8 decentralized Threshold MPC Chain Signatures 0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21).
-- Governance: Aevum Multi-Sig & Trezu multi-sig escalation for transactions exceeding autonomous limits ($500).
-- Agent Security: OutLayer policy rules and emergency circuit breaker.
+- Blockchain: QDay Aevum Testnet (Chain ID 44005, RPC: https://rpc-test.qday.info)
+- AI Inference Engine: DeepSeek AI
+- Settlement Token: tUSD8 (ERC-20 stablecoin, 6 decimals, 0x456569838f1d43009A91ebA4263147Afd7233483) and native tQDAY for gas
+- Explorer: https://explorer-test.qday.info
+- Faucet: https://faucet.qday.info
+- Smart Contract: PayQRegistry.sol (0xD64086b23C7d4499C0FD7524a47E404994097BA0)
+- Identity Feature: On-chain Confirmation of Payee (CoP) via PayQRegistry.verifyPayee() to prevent address spoofing and typosquatting.
+- Multi-Wallet Treasury Guardrails: Each connected wallet can configure its own maxSingleTxAmount, dailyVelocityCap, and emergency killswitch on-chain via PayQRegistry.updateMyGuardrails() and setMyPaused().
 
 Real Database Context:
 - Recent Invoices (${invoices.length}): ${JSON.stringify(

@@ -51,14 +51,14 @@ export function FloatingCopilot() {
   const getRouteTeaser = () => {
     if (pathname.includes("/pay")) {
       return {
-        title: "Multi-Chain Safety Guard",
-        prompt: "Need me to verify a counterparty across Stacks, Bitcoin, EVM, or tUSD8 before transferring?",
+        title: "PayQRegistry Safety Guard",
+        prompt: "Need me to verify a QDay Aevum counterparty before transferring tUSD8?",
       };
     }
     if (pathname.includes("/invoices/upload")) {
       return {
         title: "Smart OCR Assistant",
-        prompt: "Upload an invoice and I'll extract the recipient address and amount automatically.",
+        prompt: "Upload an invoice and I'll extract the recipient address and tUSD8 amount automatically.",
       };
     }
     if (pathname.includes("/invoices")) {
@@ -70,7 +70,7 @@ export function FloatingCopilot() {
     if (pathname.includes("/recipients")) {
       return {
         title: "Directory Intelligence",
-        prompt: "Ask me to explain any payee verification status, multichain address, or safety flags.",
+        prompt: "Ask me to explain any payee verification status or PayQRegistry safety flags.",
       };
     }
     return {
@@ -103,12 +103,10 @@ export function FloatingCopilot() {
   }, [messages, isOpen]);
 
   const samplePrompts = [
-    "Send $50 to LeProf on Stacks",
-    "Pay LeProf 20 tUSD8 on Solana",
-    "Send $100 to Satoshi on Bitcoin",
-    "Transfer $50 to Acme on Base",
+    "Pay 25 tUSD8 to 0x9fa9C08Bb83cf70774fd38Ee638ad98D4B6CBDCf",
     "Show my pending invoices",
-    "How does Confirmation of Payee work on tUSD8?",
+    "How do PayQRegistry Treasury Guardrails work?",
+    "How does Confirmation of Payee work on QDay Aevum?",
   ];
 
   const handleSend = async (textToSend?: string) => {
@@ -353,8 +351,8 @@ export function FloatingCopilot() {
                           <Globe className="h-3.5 w-3.5 text-brand-400" />
                           <span>{m.intent.targetChain}</span>
                         </div>
-                        <span className="font-mono text-[10px] text-cyan-400 bg-cyan-500/10 px-1.5 py-0.5 rounded border border-cyan-500/20">
-                          {m.intent.settlementExecution?.settlementRail || "Model A Solver"}
+                        <span className="font-mono text-[10px] text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded border border-emerald-500/20">
+                          {m.intent.settlementExecution?.settlementRail || "PayQRegistry (tUSD8)"}
                         </span>
                       </div>
 
