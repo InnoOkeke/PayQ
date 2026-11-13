@@ -6,23 +6,19 @@ import { resolveNaturalLanguageIntent } from "@/lib/aevum/intentResolver";
 export const dynamic = "force-dynamic";
 
 /**
- * tUSD8 Agent Market Integration (market.PayQ AI)
- * Documentation: https://docs.market.PayQ AI/
- * 
- * Allows PayQ to be listed on tUSD8 Agent Market so other AI agents,
- * swarms, and Claude Desktop MCP clients can hire PayQ to verify counterparties,
- * extract invoices, and execute multi-chain intents safely on QDay Aevum.
+ * PayQ Agent Endpoint
+ *
+ * Allows AI agents and MCP clients to verify QDay Aevum counterparties,
+ * resolve natural-language tUSD8 payment intents, and check PayQRegistry guardrails.
  */
-
-// GET returns the Agent Card / Manifest for market.PayQ AI
 export async function GET() {
   return NextResponse.json({
     name: "PayQ — Autonomous Invoicing & Confirmation of Payee Agent",
-    slug: "PayQ-ai",
+    slug: "payq-ai",
     version: "1.0.0",
-    protocol: "QDay Aevum",
+    protocol: "QDay Aevum (Chain ID 44005)",
     description:
-      "Autonomous corporate invoicing, Confirmation of Payee payee verification, Aevum Multi-Sig treasury escalation, and cross-chain intent settlement via PayQRegistry CoP.",
+      "Autonomous corporate invoicing, on-chain Confirmation of Payee verification, and multi-wallet Treasury Guardrails via PayQRegistry.sol.",
     author: "PayQ Team",
     pricing: {
       model: "FREE_TIER_WITH_GAS",
@@ -32,29 +28,34 @@ export async function GET() {
       aevumTestnet: true,
       tusd8: true,
       payqRegistry: true,
-      aevumMultiSig: true,
     },
     tools: [
       {
         name: "verify_payee",
         description:
-          "Query live QDay Aevum RPC (view_account) to verify account existence, counterparty reputation score, and typosquatting risk.",
+          "Verifies a recipient QDay Aevum 0x address against PayQRegistry.sol Confirmation of Payee directory.",
         parameters: {
-          accountId: { type: "string", description: "The recipient QDay Aevum Address (e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e)" },
+          accountId: {
+            type: "string",
+            description: "The recipient QDay Aevum 0x address",
+          },
         },
       },
       {
         name: "resolve_intent",
         description:
-          "Translates natural language prompts into verified multi-chain payment intents executed via PayQRegistry CoP MPC.",
+          "Translates natural language prompts into verified QDay Aevum tUSD8 payment intents.",
         parameters: {
-          prompt: { type: "string", description: "Plain-English intent e.g. 'Send $50 to John Kennedy on Base'" },
+          prompt: {
+            type: "string",
+            description: "Plain-English intent e.g. 'Pay 50 tUSD8 to 0x...'",
+          },
         },
       },
       {
-        name: "outlayer_security_check",
+        name: "guardrail_security_check",
         description:
-          "Validates an AI agent transaction against OutLayer spending ceilings, velocity meters, and prompt-injection firewalls.",
+          "Validates an AI agent tUSD8 transaction against single-tx ceilings, 24h velocity caps, and prompt-injection firewalls.",
         parameters: {
           senderAddress: { type: "string" },
           recipientAddress: { type: "string" },
@@ -63,21 +64,20 @@ export async function GET() {
         },
       },
       {
-        name: "sputnik_dao_escalate",
+        name: "registry_guardrail_payload",
         description:
-          "Builds a Aevum Multi-Sig v2 on-chain proposal for corporate council multi-sig vote when payment exceeds autonomous limit.",
+          "Builds a PayQRegistry.sol tUSD8 transfer/guardrail payload on QDay Aevum Testnet (Chain ID 44005).",
         parameters: {
           daoContract: { type: "string" },
           description: { type: "string" },
           receiverId: { type: "string" },
-          amountNear: { type: "number" },
+          amountTusd8: { type: "number" },
         },
       },
     ],
   });
 }
 
-// POST executes an agent tool call when hired on market.PayQ AI
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
@@ -88,27 +88,30 @@ export async function POST(req: NextRequest) {
     }
 
     if (tool === "resolve_intent") {
-      const intent = resolveNaturalLanguageIntent(params?.prompt || "", params?.senderAddress || "company.tUSD8");
+      const intent = resolveNaturalLanguageIntent(
+        params?.prompt || "",
+        params?.senderAddress || "0x0000000000000000000000000000000000000000"
+      );
       return NextResponse.json({ success: true, tool, result: intent });
     }
 
-    if (tool === "outlayer_security_check") {
+    if (tool === "guardrail_security_check" || tool === "outlayer_security_check") {
       const attestation = evaluateOutlayerPolicy({
-        senderAddress: params?.senderAddress || "agent.tUSD8",
-        recipientAddress: params?.recipientAddress || "vendor.tUSD8",
+        senderAddress: params?.senderAddress || "0x0000000000000000000000000000000000000000",
+        recipientAddress: params?.recipientAddress || "0x0000000000000000000000000000000000000000",
         amountUSD: Number(params?.amountUSD || 0),
         token: params?.token || "tUSD8",
-        intent: params?.intent || "",
+        intent: params?.intent || "External AI Agent tUSD8 Transfer",
       });
       return NextResponse.json({ success: true, tool, result: attestation });
     }
 
-    if (tool === "sputnik_dao_escalate") {
+    if (tool === "registry_guardrail_payload" || tool === "sputnik_dao_escalate") {
       const proposal = buildSputnikTransferProposal({
         daoContract: params?.daoContract,
-        description: params?.description || "Invoice payment",
-        receiverId: params?.receiverId,
-        amountNear: params?.amountNear || 1,
+        description: params?.description || "Autonomous Agent tUSD8 Settlement",
+        receiverId: params?.receiverId || "0x0000000000000000000000000000000000000000",
+        amountNear: params?.amountTusd8 ?? params?.amountNear ?? "10",
       });
       return NextResponse.json({ success: true, tool, result: proposal });
     }
@@ -118,4 +121,3 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-

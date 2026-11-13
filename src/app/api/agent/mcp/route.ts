@@ -4,16 +4,15 @@ export const dynamic = "force-dynamic";
 
 /**
  * Model Context Protocol (MCP) Server Definition
- * Allows Claude Desktop, Cursor, and Agent Market swarms to connect to PayQ.
+ * Allows Claude Desktop, Cursor, and AI agents to connect to PayQ on QDay Aevum.
  * Spec: https://modelcontextprotocol.io/
  */
-
 export async function GET() {
   return NextResponse.json({
     mcpVersion: "1.0.0",
     serverInfo: {
-      name: "PayQ-ai-mcp",
-      title: "PayQ — Autonomous Invoicing & Confirmation of Payee",
+      name: "payq-aevum-mcp",
+      title: "PayQ — Autonomous Invoicing & Confirmation of Payee (QDay Aevum)",
       version: "1.0.0",
     },
     capabilities: {
@@ -24,24 +23,24 @@ export async function GET() {
     },
     tools: [
       {
-        name: "verify_near_payee",
+        name: "verify_aevum_payee",
         description:
-          "Checks whether a recipient Aevum Address exists on-chain and verifies identity against the Confirmation of Payee registry.",
+          "Checks whether a recipient QDay Aevum 0x address is registered in PayQRegistry.sol Confirmation of Payee directory.",
         inputSchema: {
           type: "object",
           properties: {
             accountId: {
               type: "string",
-              description: "The Aevum Address (e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e or satoshi.tUSD8)",
+              description: "The QDay Aevum 0x address",
             },
           },
           required: ["accountId"],
         },
       },
       {
-        name: "evaluate_outlayer_policy",
+        name: "evaluate_guardrail_policy",
         description:
-          "Performs an OutLayer agent security check ensuring the proposed payment does not exceed velocity caps or violate prompt-injection defenses.",
+          "Performs a security guardrail check ensuring the proposed tUSD8 payment does not exceed velocity caps or contain prompt-injection patterns.",
         inputSchema: {
           type: "object",
           properties: {
@@ -53,20 +52,19 @@ export async function GET() {
         },
       },
       {
-        name: "sputnik_dao_proposal",
+        name: "payq_registry_settlement",
         description:
-          "Constructs a Aevum Multi-Sig / Trezu council transfer proposal when a payment exceeds autonomous limits.",
+          "Constructs a PayQRegistry.sol payInvoice call payload for tUSD8 settlement on QDay Aevum Testnet (Chain ID 44005).",
         inputSchema: {
           type: "object",
           properties: {
             receiverId: { type: "string" },
-            amountNear: { type: "number" },
+            amountTusd8: { type: "number" },
             description: { type: "string" },
           },
-          required: ["receiverId", "amountNear"],
+          required: ["receiverId", "amountTusd8"],
         },
       },
     ],
   });
 }
-

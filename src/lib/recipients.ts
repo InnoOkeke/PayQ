@@ -4,20 +4,12 @@ export interface CounterpartyRecord {
   id: string;
   displayName: string;
   paymentId: string;
-  walletAddress: string; // Primary tUSD8 identifier
-  evmAddress?: string; // Base / Ethereum / Arbitrum
-  bitcoinAddress?: string; // Bitcoin native (SegWit / Taproot)
-  solanaAddress?: string; // Solana
-  xrpAddress?: string; // Ripple XRP
-  cosmosAddress?: string; // Cosmos Hub
-  stacksAddress?: string; // Stacks Bitcoin L2
-  stellarAddress?: string; // Stellar
+  walletAddress: string; // QDay Aevum 0x address
   verificationStatus: "VERIFIED" | "WARNING" | "UNVERIFIED" | "MISMATCH";
   notes?: string;
   createdAt: string;
 }
 
-// Global in-memory & file-compatible store for server lifetime
 declare global {
   var __PayQ_recipients: CounterpartyRecord[] | undefined;
 }
@@ -31,23 +23,13 @@ function getStore(): CounterpartyRecord[] {
   return globalThis.__PayQ_recipients;
 }
 
-export function detectChainFromAddress(addr: string): {
+export function detectChainFromAddress(_addr: string): {
   chain: string;
   rail: string;
   currency: string;
 } {
-  const clean = addr.trim();
-
-  if (/^0x[a-fA-F0-9]{40}$/.test(clean)) {
-    return {
-      chain: "QDay Aevum Testnet (Chain ID 44005)",
-      rail: "PayQRegistry (tUSD8)",
-      currency: "tUSD8",
-    };
-  }
-
   return {
-    chain: "QDay Aevum",
+    chain: "QDay Aevum Testnet (Chain ID 44005)",
     rail: "PayQRegistry (tUSD8)",
     currency: "tUSD8",
   };
@@ -62,25 +44,16 @@ export async function listAllRecipients(): Promise<CounterpartyRecord[]> {
         orderBy: { createdAt: "desc" },
       });
       if (dbRecipients && dbRecipients.length > 0) {
-        // Merge DB with store
         const merged: CounterpartyRecord[] = dbRecipients.map((r: any) => ({
           id: r.id,
           displayName: r.displayName,
           paymentId: r.paymentId,
           walletAddress: r.walletAddress,
-          evmAddress: r.evmAddress || undefined,
-          bitcoinAddress: r.bitcoinAddress || undefined,
-          solanaAddress: r.solanaAddress || undefined,
-          xrpAddress: r.xrpAddress || undefined,
-          cosmosAddress: r.cosmosAddress || undefined,
-          stacksAddress: r.stacksAddress || undefined,
-          stellarAddress: r.stellarAddress || undefined,
           verificationStatus: r.verificationStatus as any,
           notes: r.notes || "",
           createdAt: r.createdAt.toISOString(),
         }));
 
-        // Add any store records not in DB
         for (const item of store) {
           if (!merged.some((m) => m.walletAddress.toLowerCase() === item.walletAddress.toLowerCase())) {
             merged.push(item);
@@ -100,18 +73,11 @@ export async function addCounterparty(data: {
   displayName: string;
   paymentId: string;
   walletAddress: string;
-  evmAddress?: string;
-  bitcoinAddress?: string;
-  solanaAddress?: string;
-  xrpAddress?: string;
-  cosmosAddress?: string;
-  stacksAddress?: string;
-  stellarAddress?: string;
   notes?: string;
   verificationStatus?: "VERIFIED" | "WARNING" | "UNVERIFIED" | "MISMATCH";
 }): Promise<CounterpartyRecord> {
   const store = getStore();
-  const cleanAddr = data.walletAddress.trim().toLowerCase();
+  const cleanAddr = data.walletAddress.trim();
   const cleanPaymentId = data.paymentId.trim().toLowerCase();
 
   const newRecord: CounterpartyRecord = {
@@ -119,25 +85,15 @@ export async function addCounterparty(data: {
     displayName: data.displayName.trim(),
     paymentId: cleanPaymentId,
     walletAddress: cleanAddr,
-    evmAddress: data.evmAddress ? data.evmAddress.trim() : undefined,
-    bitcoinAddress: data.bitcoinAddress ? data.bitcoinAddress.trim() : undefined,
-    solanaAddress: data.solanaAddress ? data.solanaAddress.trim() : undefined,
-    xrpAddress: data.xrpAddress ? data.xrpAddress.trim() : undefined,
-    cosmosAddress: data.cosmosAddress ? data.cosmosAddress.trim() : undefined,
-    stacksAddress: data.stacksAddress ? data.stacksAddress.trim() : undefined,
-    stellarAddress: data.stellarAddress ? data.stellarAddress.trim() : undefined,
     verificationStatus: data.verificationStatus || "VERIFIED",
-    notes: data.notes || "Attested corporate counterparty in PayQ Directory.",
+    notes: data.notes || "Attested corporate counterparty on QDay Aevum Testnet.",
     createdAt: new Date().toISOString(),
   };
 
-  // Upsert in memory store
   const existingIndex = store.findIndex(
     (r) =>
-      r.walletAddress.toLowerCase() === cleanAddr ||
-      r.paymentId.toLowerCase() === cleanPaymentId ||
-      (newRecord.evmAddress && r.evmAddress?.toLowerCase() === newRecord.evmAddress.toLowerCase()) ||
-      (newRecord.solanaAddress && r.solanaAddress?.toLowerCase() === newRecord.solanaAddress.toLowerCase())
+      r.walletAddress.toLowerCase() === cleanAddr.toLowerCase() ||
+      r.paymentId.toLowerCase() === cleanPaymentId
   );
   if (existingIndex >= 0) {
     store[existingIndex] = { ...store[existingIndex], ...newRecord };
@@ -145,7 +101,6 @@ export async function addCounterparty(data: {
     store.unshift(newRecord);
   }
 
-  // Also sync to DB if DATABASE_URL is available
   if (process.env.DATABASE_URL && process.env.DATABASE_URL.trim() !== "") {
     try {
       await prisma.recipient.upsert({
@@ -153,13 +108,6 @@ export async function addCounterparty(data: {
         update: {
           displayName: newRecord.displayName,
           walletAddress: cleanAddr,
-          evmAddress: newRecord.evmAddress,
-          bitcoinAddress: newRecord.bitcoinAddress,
-          solanaAddress: newRecord.solanaAddress,
-          xrpAddress: newRecord.xrpAddress,
-          cosmosAddress: newRecord.cosmosAddress,
-          stacksAddress: newRecord.stacksAddress,
-          stellarAddress: newRecord.stellarAddress,
           verificationStatus: newRecord.verificationStatus,
           notes: newRecord.notes,
         },
@@ -167,13 +115,6 @@ export async function addCounterparty(data: {
           displayName: newRecord.displayName,
           paymentId: cleanPaymentId,
           walletAddress: cleanAddr,
-          evmAddress: newRecord.evmAddress,
-          bitcoinAddress: newRecord.bitcoinAddress,
-          solanaAddress: newRecord.solanaAddress,
-          xrpAddress: newRecord.xrpAddress,
-          cosmosAddress: newRecord.cosmosAddress,
-          stacksAddress: newRecord.stacksAddress,
-          stellarAddress: newRecord.stellarAddress,
           verificationStatus: newRecord.verificationStatus,
           notes: newRecord.notes,
         },
@@ -188,67 +129,17 @@ export async function addCounterparty(data: {
 
 export async function findCounterparty(cleanAddress: string, paymentId?: string): Promise<CounterpartyRecord | null> {
   const all = await listAllRecipients();
-  const normalizedAddr = cleanAddress.trim();
-  const lowerAddr = normalizedAddr.toLowerCase();
+  const lowerAddr = cleanAddress.trim().toLowerCase();
 
-  // 1. Direct tUSD8 address match
   let match = all.find((r) => r.walletAddress.toLowerCase() === lowerAddr);
   if (match) return match;
 
-  // 2. EVM address match
-  if (lowerAddr.startsWith("0x")) {
-    match = all.find((r) => r.evmAddress && r.evmAddress.toLowerCase() === lowerAddr);
-    if (match) return match;
-    match = all.find((r) => r.walletAddress.toLowerCase() === lowerAddr);
-    if (match) return match;
-  }
-
-  // 3. Bitcoin address match
-  match = all.find((r) => r.bitcoinAddress && r.bitcoinAddress.toLowerCase() === lowerAddr);
-  if (match) return match;
-
-  // 4. Solana address match (case-sensitive Base58)
-  match = all.find((r) => r.solanaAddress && r.solanaAddress === normalizedAddr);
-  if (match) return match;
-
-  // 5. Ripple XRP match
-  match = all.find((r) => r.xrpAddress && r.xrpAddress === normalizedAddr);
-  if (match) return match;
-
-  // 6. Cosmos match
-  match = all.find((r) => r.cosmosAddress && r.cosmosAddress.toLowerCase() === lowerAddr);
-  if (match) return match;
-
-  // 7. Stacks match
-  match = all.find((r) => r.stacksAddress && r.stacksAddress === normalizedAddr);
-  if (match) return match;
-
-  // 8. Stellar match
-  match = all.find((r) => r.stellarAddress && r.stellarAddress === normalizedAddr);
-  if (match) return match;
-
-  // 9. Handle common tUSD8 typo like .tesnet -> .testnet
-  if (lowerAddr.endsWith(".tesnet")) {
-    const fixed = lowerAddr.replace(/\.tesnet$/, ".testnet");
-    match = all.find((r) => r.walletAddress.toLowerCase() === fixed);
-    if (match) return match;
-  }
-
-  // 10. If address has no extension, check if appending .testnet matches
-  if (!lowerAddr.includes(".") && !lowerAddr.startsWith("0x")) {
-    const withTestnet = `${lowerAddr}.testnet`;
-    match = all.find((r) => r.walletAddress.toLowerCase() === withTestnet);
-    if (match) return match;
-  }
-
-  // 11. PaymentId match
   if (paymentId) {
     const normalizedPid = paymentId.trim().toLowerCase();
     match = all.find((r) => r.paymentId.toLowerCase() === normalizedPid);
     if (match) return match;
   }
 
-  // 12. Display name match
   match = all.find((r) => r.displayName.toLowerCase() === lowerAddr);
   if (match) return match;
 

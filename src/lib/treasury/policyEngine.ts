@@ -7,12 +7,12 @@
  * - Department budget allocations
  * - Autonomous auto-approval thresholds for verified counterparties (<= $100.00 USD)
  * - Counterparty trust & reputation scoring (0-100)
- * - Aevum Multi-Sig / Trezu Multi-Sig Escalation for high-value transfers
- * - OutLayer Agent Security attestation
+ * - PayQRegistry On-Chain Guardrails & Multi-Wallet Policy Enforcement
+ * - Agent Security Guardrail attestation
  */
 
 import { evaluateOutlayerPolicy, OutlayerAttestation } from "@/lib/security/outlayer";
-import { buildSputnikTransferProposal, DEFAULT_SPUTNIK_DAO } from "./sputnikDao";
+import { buildSputnikTransferProposal, DEFAULT_REGISTRY_CONTRACT } from "./sputnikDao";
 
 export interface TreasuryPolicy {
   maxSingleTxAmountUSD: number; // e.g. $500.00
@@ -46,7 +46,7 @@ export const DEFAULT_TREASURY_POLICY: TreasuryPolicy = {
   dailyVelocityCapUSD: 2500,
   autoApproveVerifiedUnderUSD: 100,
   emergencyKillswitchActive: false,
-  sputnikDaoContract: DEFAULT_SPUTNIK_DAO,
+  sputnikDaoContract: DEFAULT_REGISTRY_CONTRACT,
   departmentBudgets: [
     { category: "Engineering & Audits", monthlyBudgetUSD: 5000, spentThisMonthUSD: 1450 },
     { category: "Design & UX", monthlyBudgetUSD: 2500, spentThisMonthUSD: 850 },

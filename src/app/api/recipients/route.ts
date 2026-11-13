@@ -19,20 +19,13 @@ export async function POST(req: NextRequest) {
       displayName,
       paymentId,
       walletAddress,
-      evmAddress,
-      bitcoinAddress,
-      solanaAddress,
-      xrpAddress,
-      cosmosAddress,
-      stacksAddress,
-      stellarAddress,
       notes,
       verificationStatus,
     } = body;
 
     if (!displayName || !walletAddress) {
       return NextResponse.json(
-        { error: "Display name and primary QDay Aevum Address are required." },
+        { error: "Display name and QDay Aevum Address are required." },
         { status: 400 }
       );
     }
@@ -49,22 +42,10 @@ export async function POST(req: NextRequest) {
       paymentId = cleanWallet.slice(0, 10).toLowerCase();
     }
 
-    let cleanEvm = evmAddress?.trim();
-    if (cleanEvm && !cleanEvm.startsWith("0x")) {
-      cleanEvm = `0x${cleanEvm}`;
-    }
-
     const recipient = await addCounterparty({
       displayName,
       paymentId,
       walletAddress: cleanWallet,
-      evmAddress: cleanEvm || undefined,
-      bitcoinAddress: bitcoinAddress?.trim() || undefined,
-      solanaAddress: solanaAddress?.trim() || undefined,
-      xrpAddress: xrpAddress?.trim() || undefined,
-      cosmosAddress: cosmosAddress?.trim() || undefined,
-      stacksAddress: stacksAddress?.trim() || undefined,
-      stellarAddress: stellarAddress?.trim() || undefined,
       notes,
       verificationStatus: verificationStatus || "VERIFIED",
     });

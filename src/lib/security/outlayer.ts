@@ -1,11 +1,8 @@
 /**
- * OutLayer Integration — Secure Transactions for AI Agents
- * Documentation: https://app.outlayer.ai/docs/getting-started
- * Website: https://outlayer.ai/
- * GitHub: https://github.com/out-layer/outlayer
- * 
- * Intercepts AI agent intents to guarantee compliance with security policies,
- * destination reputation checks, and velocity guardrails before signing.
+ * PayQ Agent Guardrail Policy Engine (QDay Aevum Testnet)
+ *
+ * Intercepts AI agent tUSD8 intents to guarantee compliance with security policies,
+ * address validation, and velocity guardrails before signing.
  */
 
 export interface OutlayerPolicyCheckParams {
@@ -33,21 +30,19 @@ export interface OutlayerAttestation {
 
 export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): OutlayerAttestation {
   const {
-    agentId = "PayQ-autonomous-agent.tUSD8",
-    senderAddress,
+    agentId = "payq-aevum-agent",
     recipientAddress,
     amountUSD,
-    token,
     intent,
   } = params;
 
   const rules: OutlayerAttestation["enforcedRules"] = [];
-  let riskScore = 10; // Low base risk
+  let riskScore = 10;
 
   // 1. Single-tx limit check ($500 ceiling)
   const passedSingleTx = amountUSD <= 500;
   rules.push({
-    rule: "OUTLAYER_MAX_TX_CEILING_USD",
+    rule: "AEVUM_MAX_TX_CEILING_USD",
     passed: passedSingleTx,
     reason: passedSingleTx
       ? `Transaction amount ($${amountUSD.toFixed(2)}) is within $500 ceiling.`
@@ -55,18 +50,16 @@ export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): Outla
   });
   if (!passedSingleTx) riskScore += 45;
 
-  // 2. Lookalike typosquatting check (e.g. *.testnet or *.tUSD8 format)
-  const isNamedAccount = recipientAddress.endsWith(".testnet") || recipientAddress.endsWith(".tUSD8");
-  const hasDigitSubstitution = /[0-9]/.test(recipientAddress.replace(/\.(testnet|tUSD8)/, ""));
-  const passedAntiSpoof = !(hasDigitSubstitution && recipientAddress.includes("satos"));
+  // 2. QDay Aevum 0x address format validation
+  const passedAddressCheck = /^0x[a-fA-F0-9]{40}$/.test(recipientAddress.trim());
   rules.push({
-    rule: "OUTLAYER_ANTI_SPOOF_VERIFICATION",
-    passed: passedAntiSpoof,
-    reason: passedAntiSpoof
-      ? "Recipient address passed lookalike entropy check."
-      : "Suspicious character substitution detected in recipient handle.",
+    rule: "AEVUM_ADDRESS_FORMAT_VERIFICATION",
+    passed: passedAddressCheck,
+    reason: passedAddressCheck
+      ? "Recipient address is a valid 42-character QDay Aevum EVM address."
+      : "Recipient address does not match QDay Aevum 0x address format.",
   });
-  if (!passedAntiSpoof) riskScore += 60;
+  if (!passedAddressCheck) riskScore += 50;
 
   // 3. Prompt injection detection on intent string
   const lowerIntent = (intent || "").toLowerCase();
@@ -76,7 +69,7 @@ export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): Outla
     lowerIntent.includes("drain") ||
     lowerIntent.includes("attacker");
   rules.push({
-    rule: "OUTLAYER_PROMPT_INJECTION_SHIELD",
+    rule: "AEVUM_PROMPT_INJECTION_SHIELD",
     passed: !containsJailbreak,
     reason: !containsJailbreak
       ? "No prompt injection tokens identified."
@@ -84,7 +77,6 @@ export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): Outla
   });
   if (containsJailbreak) riskScore += 80;
 
-  // Determine recommendation
   let recommendation: OutlayerAttestation["recommendation"] = "APPROVE_AUTONOMOUS";
   if (riskScore >= 70 || containsJailbreak) {
     recommendation = "BLOCK_SUSPICIOUS";
@@ -93,7 +85,7 @@ export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): Outla
   }
 
   const compliant = recommendation !== "BLOCK_SUSPICIOUS";
-  const attestationId = `OUTLAYER-ATT-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
+  const attestationId = `AEVUM-GUARD-${Date.now().toString(36).toUpperCase()}-${Math.random().toString(36).slice(2, 8).toUpperCase()}`;
 
   return {
     compliant,
@@ -105,4 +97,3 @@ export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): Outla
     recommendation,
   };
 }
-
