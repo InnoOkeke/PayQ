@@ -48,6 +48,12 @@ interface WalletContextType {
     legalName: string,
     paymentId: string
   ) => Promise<string | null>;
+  updateGuardrailsOnChain: (
+    maxSingleTxTusd8: number,
+    dailyCapTusd8: number,
+    paused: boolean
+  ) => Promise<string | null>;
+  setPausedOnChain: (paused: boolean) => Promise<string | null>;
 }
 
 const WalletContext = createContext<WalletContextType>({
@@ -68,6 +74,8 @@ const WalletContext = createContext<WalletContextType>({
   sendTusd8Payment: async () => "",
   sendNativePayment: async () => "",
   registerPayeeOnChain: async () => null,
+  updateGuardrailsOnChain: async () => null,
+  setPausedOnChain: async () => null,
 });
 
 export function WalletProvider({ children }: { children: React.ReactNode }) {
@@ -264,6 +272,56 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
     [isWrongNetwork, switchToAevum, writeContractAsync]
   );
 
+  const updateGuardrailsOnChain = useCallback(
+    async (
+      maxSingleTxTusd8: number,
+      dailyCapTusd8: number,
+      paused: boolean
+    ): Promise<string | null> => {
+      const registryAddr = AEVUM_CONFIG.payqRegistryAddress;
+      if (!registryAddr || !registryAddr.startsWith("0x")) return null;
+      if (isWrongNetwork) await switchToAevum();
+
+      const txHash = await writeContractAsync({
+        address: registryAddr,
+        abi: PAYQ_REGISTRY_ABI,
+        functionName: "updateGuardrails",
+        args: [
+          parseUnits(String(maxSingleTxTusd8), AEVUM_CONFIG.tusd8Decimals),
+          parseUnits(String(dailyCapTusd8), AEVUM_CONFIG.tusd8Decimals),
+          paused,
+        ],
+        chainId: AEVUM_CHAIN_ID,
+      });
+      if (publicClient) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash });
+      }
+      return txHash;
+    },
+    [isWrongNetwork, switchToAevum, writeContractAsync, publicClient]
+  );
+
+  const setPausedOnChain = useCallback(
+    async (paused: boolean): Promise<string | null> => {
+      const registryAddr = AEVUM_CONFIG.payqRegistryAddress;
+      if (!registryAddr || !registryAddr.startsWith("0x")) return null;
+      if (isWrongNetwork) await switchToAevum();
+
+      const txHash = await writeContractAsync({
+        address: registryAddr,
+        abi: PAYQ_REGISTRY_ABI,
+        functionName: "setPaused",
+        args: [paused],
+        chainId: AEVUM_CHAIN_ID,
+      });
+      if (publicClient) {
+        await publicClient.waitForTransactionReceipt({ hash: txHash });
+      }
+      return txHash;
+    },
+    [isWrongNetwork, switchToAevum, writeContractAsync, publicClient]
+  );
+
   return (
     <WalletContext.Provider
       value={{
@@ -284,6 +342,8 @@ export function WalletProvider({ children }: { children: React.ReactNode }) {
         sendTusd8Payment,
         sendNativePayment,
         registerPayeeOnChain,
+        updateGuardrailsOnChain,
+        setPausedOnChain,
       }}
     >
       {children}

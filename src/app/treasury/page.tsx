@@ -19,53 +19,103 @@ import {
   Cpu,
   Layers
 } from "lucide-react";
+import { createPublicClient, formatUnits, http } from "viem";
 import { DEFAULT_TREASURY_POLICY } from "@/lib/treasury/policyEngine";
-import { buildSputnikTransferProposal, DEFAULT_SPUTNIK_DAO } from "@/lib/treasury/sputnikDao";
-import { evaluateOutlayerPolicy } from "@/lib/security/outlayer";
 import { formatCurrency } from "@/lib/utils";
 import { useWallet } from "@/context/WalletContext";
+import {
+  AEVUM_CONFIG,
+  PAYQ_REGISTRY_ABI,
+  explorerAddressUrl,
+  explorerTxUrl,
+  qdayAevumTestnet,
+} from "@/lib/aevum/config";
+
+const aevumClient = createPublicClient({
+  chain: qdayAevumTestnet,
+  transport: http(AEVUM_CONFIG.rpcUrl),
+});
 
 export default function TreasuryPage() {
-  const { accountId } = useWallet();
+  const {
+    accountId,
+    isConnected,
+    connect,
+    updateGuardrailsOnChain,
+    setPausedOnChain,
+  } = useWallet();
   const [maxSingleTx, setMaxSingleTx] = useState(DEFAULT_TREASURY_POLICY.maxSingleTxAmountUSD);
   const [dailyCap, setDailyCap] = useState(DEFAULT_TREASURY_POLICY.dailyVelocityCapUSD);
   const [autoApproveUnder, setAutoApproveUnder] = useState(DEFAULT_TREASURY_POLICY.autoApproveVerifiedUnderUSD);
   const [killswitch, setKillswitch] = useState(false);
+  const [contractOwner, setContractOwner] = useState<string | null>(null);
+  const [lastTxHash, setLastTxHash] = useState<string | null>(null);
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [sputnikSuccess, setSputnikSuccess] = useState<string | null>(null);
-  const [spentTodayUSD, setSpentTodayUSD] = useState(340);
+  const [spentTodayUSD, setSpentTodayUSD] = useState(0);
   const [policyError, setPolicyError] = useState<string | null>(null);
   const [policyLoading, setPolicyLoading] = useState(false);
   const [savingPolicy, setSavingPolicy] = useState(false);
 
   const [budgets, setBudgets] = useState(DEFAULT_TREASURY_POLICY.departmentBudgets);
 
+  // Load live on-chain guardrails directly from PayQRegistry.sol on QDay Aevum Testnet
   useEffect(() => {
-    if (!accountId) return;
+    const registryAddr = AEVUM_CONFIG.payqRegistryAddress;
+    if (!registryAddr) return;
     let cancelled = false;
 
-    setPolicyLoading(true);
-    fetch(`/api/treasury/policy?accountId=${encodeURIComponent(accountId)}`)
-      .then((res) => res.json())
-      .then((data) => {
-        if (cancelled || !data?.policy) return;
-        const policy = data.policy;
-        setMaxSingleTx(policy.maxSingleTxAmountUSD);
-        setDailyCap(policy.dailyVelocityCapUSD);
-        setAutoApproveUnder(policy.autoApproveVerifiedUnderUSD);
-        setKillswitch(policy.emergencyKillswitchActive);
-        if (Array.isArray(policy.departmentBudgets) && policy.departmentBudgets.length > 0) {
-          setBudgets(policy.departmentBudgets);
-        }
-        if (typeof data.velocity?.spentUSD === "number") {
-          setSpentTodayUSD(data.velocity.spentUSD);
-        }
-      })
-      .catch(() => undefined)
-      .finally(() => {
-        if (!cancelled) setPolicyLoading(false);
-      });
+    async function loadOnChainGuardrails() {
+      setPolicyLoading(true);
+      try {
+        const [onChainMax, onChainCap, onChainPaused, onChainOwner] = await Promise.all([
+          aevumClient.readContract({
+            address: registryAddr as `0x${string}`,
+            abi: PAYQ_REGISTRY_ABI,
+            functionName: "maxSingleTxAmount",
+          }) as Promise<bigint>,
+          aevumClient.readContract({
+            address: registryAddr as `0x${string}`,
+            abi: PAYQ_REGISTRY_ABI,
+            functionName: "dailyVelocityCap",
+          }) as Promise<bigint>,
+          aevumClient.readContract({
+            address: registryAddr as `0x${string}`,
+            abi: PAYQ_REGISTRY_ABI,
+            functionName: "paused",
+          }) as Promise<boolean>,
+          aevumClient.readContract({
+            address: registryAddr as `0x${string}`,
+            abi: PAYQ_REGISTRY_ABI,
+            functionName: "owner",
+          }) as Promise<string>,
+        ]);
 
+        if (cancelled) return;
+        setMaxSingleTx(Number(formatUnits(onChainMax, AEVUM_CONFIG.tusd8Decimals)));
+        setDailyCap(Number(formatUnits(onChainCap, AEVUM_CONFIG.tusd8Decimals)));
+        setKillswitch(onChainPaused);
+        setContractOwner(onChainOwner);
+
+        if (accountId && accountId.startsWith("0x")) {
+          const spent = (await aevumClient.readContract({
+            address: registryAddr as `0x${string}`,
+            abi: PAYQ_REGISTRY_ABI,
+            functionName: "windowSpent",
+            args: [accountId as `0x${string}`],
+          })) as bigint;
+          if (!cancelled) {
+            setSpentTodayUSD(Number(formatUnits(spent, AEVUM_CONFIG.tusd8Decimals)));
+          }
+        }
+      } catch (err) {
+        console.warn("Failed to read PayQRegistry on-chain guardrails:", err);
+      } finally {
+        if (!cancelled) setPolicyLoading(false);
+      }
+    }
+
+    loadOnChainGuardrails();
     return () => {
       cancelled = true;
     };
@@ -114,78 +164,58 @@ export default function TreasuryPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!accountId) {
-      setPolicyError("Connect your tUSD8 wallet to persist treasury policy.");
+    if (!isConnected || !accountId) {
+      await connect();
       return;
     }
 
     setSavingPolicy(true);
     setPolicyError(null);
     try {
-      const res = await fetch("/api/treasury/policy", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          accountId,
-          maxSingleTxAmountUSD: maxSingleTx,
-          dailyVelocityCapUSD: dailyCap,
-          autoApproveVerifiedUnderUSD: autoApproveUnder,
-          emergencyKillswitchActive: killswitch,
-          departmentBudgets: budgets,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || data.message || "Failed to save treasury policy.");
+      const txHash = await updateGuardrailsOnChain(maxSingleTx, dailyCap, killswitch);
+      if (txHash) {
+        setLastTxHash(txHash);
       }
-      const policy = data.policy;
-      setMaxSingleTx(policy.maxSingleTxAmountUSD);
-      setDailyCap(policy.dailyVelocityCapUSD);
-      setAutoApproveUnder(policy.autoApproveVerifiedUnderUSD);
-      setKillswitch(policy.emergencyKillswitchActive);
       setSavedSuccess(true);
-      setTimeout(() => setSavedSuccess(false), 2500);
+      setTimeout(() => setSavedSuccess(false), 3500);
     } catch (err: any) {
-      setPolicyError(err.message || "Failed to save treasury policy.");
+      setPolicyError(
+        err?.shortMessage ||
+          err?.message ||
+          "On-chain updateGuardrails failed (only the PayQRegistry owner can update contract limits)."
+      );
     } finally {
       setSavingPolicy(false);
     }
   };
 
   const handleKillswitch = async () => {
-    const next = !killswitch;
-    setKillswitch(next);
-    if (!accountId) {
-      setPolicyError("Connect your tUSD8 wallet to persist the killswitch state.");
+    if (!isConnected || !accountId) {
+      await connect();
       return;
     }
-
+    const next = !killswitch;
+    setKillswitch(next);
     setPolicyError(null);
     try {
-      const res = await fetch("/api/treasury/killswitch", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ accountId, active: next }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        throw new Error(data.error || data.message || "Failed to update killswitch.");
+      const txHash = await setPausedOnChain(next);
+      if (txHash) {
+        setLastTxHash(txHash);
       }
-      setKillswitch(data.policy.emergencyKillswitchActive);
     } catch (err: any) {
       setKillswitch(!next);
-      setPolicyError(err.message || "Failed to update killswitch.");
+      setPolicyError(
+        err?.shortMessage ||
+          err?.message ||
+          "On-chain setPaused failed (only the PayQRegistry owner can toggle the emergency pause)."
+      );
     }
   };
 
   const handleTestSputnikProposal = () => {
-    const proposal = buildSputnikTransferProposal({
-      daoContract: DEFAULT_SPUTNIK_DAO,
-      description: "Approve high-value invoice INV-2026-9042 for Acme Design Studio",
-      receiverId: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
-      amountNear: 75,
-    });
-    setSputnikSuccess(`Proposal drafted for ${proposal.contractId}: methodName='${proposal.methodName}' with 0.1 tUSD8 bond.`);
+    setSputnikSuccess(
+      `On-chain PayQRegistry (${AEVUM_CONFIG.payqRegistryAddress.slice(0, 10)}...) enforces maxSingleTx=${maxSingleTx} tUSD8 & dailyCap=${dailyCap} tUSD8.`
+    );
     setTimeout(() => setSputnikSuccess(null), 6000);
   };
 
@@ -196,17 +226,41 @@ export default function TreasuryPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold uppercase tracking-wider text-brand-400">
-              AI Security, Aevum Multi-Sig &amp; OutLayer
+              On-Chain Smart Contract Guardrails
             </span>
-            <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-            <span className="text-xs text-slate-400">Institutional Governance</span>
+            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+            <a
+              href={explorerAddressUrl(AEVUM_CONFIG.payqRegistryAddress)}
+              target="_blank"
+              rel="noreferrer"
+              className="text-xs font-mono text-emerald-400 hover:underline inline-flex items-center gap-1"
+            >
+              <span>PayQRegistry ({AEVUM_CONFIG.payqRegistryAddress.slice(0, 8)}...)</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Treasury Guardrails &amp; Security Policy Engine
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Control AI spending with cryptographic limits, Aevum Multi-Sig / Trezu multi-sig escalation, and OutLayer agent attestation.
+            Live limits enforced on-chain by PayQRegistry.sol on QDay Aevum Testnet (Chain ID 44005).
+            {contractOwner && (
+              <span className="ml-2 font-mono text-[11px] text-slate-500">
+                Owner: {contractOwner.slice(0, 6)}...{contractOwner.slice(-4)}
+              </span>
+            )}
           </p>
+          {lastTxHash && (
+            <a
+              href={explorerTxUrl(lastTxHash)}
+              target="_blank"
+              rel="noreferrer"
+              className="mt-2 inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:underline"
+            >
+              <span>Latest On-Chain Policy Tx: {lastTxHash.slice(0, 14)}...</span>
+              <ExternalLink className="h-3 w-3" />
+            </a>
+          )}
         </div>
 
         {/* Emergency Killswitch Toggle */}
@@ -236,7 +290,7 @@ export default function TreasuryPage() {
             </div>
             <h4 className="text-sm font-bold text-white">Trezu &amp; Aevum Multi-Sig Escalation</h4>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Payments &gt; ${maxSingleTx} bypass automated agent execution and trigger an on-chain proposal to <code className="text-brand-300 font-mono text-[11px]">{DEFAULT_SPUTNIK_DAO}</code>.
+              Payments &gt; {maxSingleTx} tUSD8 are automatically blocked on-chain by <code className="text-brand-300 font-mono text-[11px]">PayQRegistry.sol</code>.
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-navy-800/80">

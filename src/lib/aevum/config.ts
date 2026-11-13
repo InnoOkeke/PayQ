@@ -57,9 +57,13 @@ export const PAYQ_REGISTRY_ABI = parseAbi([
   "function registerPayee(address payee, string legalName, string paymentId)",
   "function verifyPayee(address payee, string expectedName) view returns (string status, string registeredName, uint8 trustScore)",
   "function payInvoice(address payee, uint256 amount, string invoiceRef, string expectedName)",
+  "function updateGuardrails(uint256 _maxSingleTxAmount, uint256 _dailyVelocityCap, bool _paused)",
+  "function setPaused(bool _paused)",
   "function maxSingleTxAmount() view returns (uint256)",
   "function dailyVelocityCap() view returns (uint256)",
   "function paused() view returns (bool)",
+  "function owner() view returns (address)",
+  "function windowSpent(address account) view returns (uint256)",
 ]);
 
 export function isValidAevumAddress(addr: string): addr is `0x${string}` {
