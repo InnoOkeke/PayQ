@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import { PayQLogo } from "@/components/brand/Logos";
 import { useWallet } from "@/context/WalletContext";
+import { explorerTxUrl } from "@/lib/aevum/config";
 
 interface Message {
   role: "user" | "assistant";
@@ -31,10 +32,11 @@ interface Message {
 export function FloatingCopilot() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isConnected, balance } = useWallet();
+  const { accountId, isConnected, balance, connect, sendTusd8Payment, sendNativePayment } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const [hasDismissedTeaser, setHasDismissedTeaser] = useState(false);
   const [showTeaser, setShowTeaser] = useState(false);
+  const [payingIndex, setPayingIndex] = useState<number | null>(null);
 
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -174,6 +176,78 @@ export function FloatingCopilot() {
     return () => window.removeEventListener("PayQ:open-copilot", handleOpenCopilot);
   }, []);
 
+  const handlePayDirectlyInChat = async (intent: any, msgIndex: number) => {
+    if (!intent) return;
+    const targetAddr = intent.resolvedPayee?.targetChainAddress || intent.resolvedPayee?.accountId;
+    if (!targetAddr || !/^0x[a-fA-F0-9]{40}$/.test(targetAddr)) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: "Cannot execute payment: missing a valid QDay Aevum 0x recipient address.",
+        },
+      ]);
+      return;
+    }
+
+    if (!isConnected || !accountId) {
+      await connect();
+      return;
+    }
+
+    setPayingIndex(msgIndex);
+    try {
+      const amountStr = String(intent.extractedAmount);
+      const isNative = intent.extractedCurrency === "tQDAY";
+      const txHash = isNative
+        ? await sendNativePayment(targetAddr, amountStr)
+        : await sendTusd8Payment(
+            targetAddr,
+            amountStr,
+            intent.memo || "PayQ Copilot Settlement",
+            intent.resolvedPayee?.displayName || ""
+          );
+
+      await fetch("/api/payments", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          senderAddress: accountId,
+          recipientAddress: targetAddr,
+          amount: Number(intent.extractedAmount),
+          token: intent.extractedCurrency || "tUSD8",
+          transactionHash: txHash,
+          invoiceId: intent.invoiceId || undefined,
+          memo: intent.memo || "Paid via PayQ Copilot",
+          verificationStatus: intent.resolvedPayee?.verificationStatus || "VERIFIED",
+          network: "QDay Aevum Testnet",
+        }),
+      });
+
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content:
+            `✅ Payment Confirmed on QDay Aevum!\n\n` +
+            `• Sent ${intent.extractedAmount} ${intent.extractedCurrency || "tUSD8"} to ${intent.resolvedPayee?.displayName || targetAddr}\n` +
+            `• Tx Hash: ${txHash}\n` +
+            `• Explorer: ${explorerTxUrl(txHash)}`,
+        },
+      ]);
+    } catch (err: any) {
+      setMessages((prev) => [
+        ...prev,
+        {
+          role: "assistant",
+          content: `❌ Payment failed or rejected: ${err?.shortMessage || err?.message || "Transaction cancelled"}`,
+        },
+      ]);
+    } finally {
+      setPayingIndex(null);
+    }
+  };
+
   const handleApplyAndPay = (intent: any) => {
     if (!intent) return;
 
@@ -184,21 +258,8 @@ export function FloatingCopilot() {
     }
 
     const targetAddr =
-      intent.targetChain !== "QDay Aevum" && intent.resolvedPayee?.targetChainAddress
-        ? intent.resolvedPayee.targetChainAddress
-        : intent.resolvedPayee?.accountId || "0x71C8360f3a8b417c805F99D4133A89f07447d251";
-
-    let chainParam = "tUSD8";
-    const tc = (intent.targetChain || "").toLowerCase();
-    if (tc.includes("base")) chainParam = "base";
-    else if (tc.includes("eth")) chainParam = "ethereum";
-    else if (tc.includes("arbitrum")) chainParam = "arbitrum";
-    else if (tc.includes("bitcoin") || tc.includes("btc")) chainParam = "bitcoin";
-    else if (tc.includes("solana")) chainParam = "solana";
-    else if (tc.includes("xrp") || tc.includes("ripple")) chainParam = "xrp";
-    else if (tc.includes("cosmos")) chainParam = "cosmos";
-    else if (tc.includes("stacks")) chainParam = "stacks";
-    else if (tc.includes("stellar")) chainParam = "stellar";
+      intent.resolvedPayee?.targetChainAddress || intent.resolvedPayee?.accountId || "";
+    const chainParam = "aevum";
 
     if (pathname === "/pay") {
       window.dispatchEvent(
@@ -396,25 +457,47 @@ export function FloatingCopilot() {
                         )}
                       </div>
 
-                      <button
-                        type="button"
-                        disabled={isConnected && Boolean(balance) && m.intent.extractedAmount > parseFloat(balance)}
-                        onClick={() => handleApplyAndPay(m.intent)}
-                        className="w-full mt-2 inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/[0.04] disabled:text-slate-500 disabled:border disabled:border-white/[0.08] disabled:cursor-not-allowed text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-[0.98]"
-                      >
-                        {isConnected && Boolean(balance) && m.intent.extractedAmount > parseFloat(balance) ? (
-                          <>
-                            <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
-                            <span>Insufficient Balance ({balance} tUSD8)</span>
-                          </>
-                        ) : (
-                          <>
-                            <Wallet className="h-3.5 w-3.5" />
-                            <span>Apply &amp; Pay Now</span>
-                            <ArrowRight className="h-3.5 w-3.5" />
-                          </>
-                        )}
-                      </button>
+                      <div className="flex flex-col gap-1.5 mt-2">
+                        <button
+                          type="button"
+                          disabled={
+                            payingIndex === i ||
+                            (isConnected && Boolean(balance) && m.intent.extractedAmount > parseFloat(balance))
+                          }
+                          onClick={() => handlePayDirectlyInChat(m.intent, i)}
+                          className="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 disabled:bg-white/[0.04] disabled:text-slate-500 disabled:border disabled:border-white/[0.08] disabled:cursor-not-allowed text-white font-semibold text-xs shadow-md shadow-emerald-600/20 transition-all active:scale-[0.98]"
+                        >
+                          {payingIndex === i ? (
+                            <>
+                              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                              <span>Confirming in Wallet...</span>
+                            </>
+                          ) : isConnected && Boolean(balance) && m.intent.extractedAmount > parseFloat(balance) ? (
+                            <>
+                              <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
+                              <span>Insufficient Balance ({balance} tUSD8)</span>
+                            </>
+                          ) : isConnected ? (
+                            <>
+                              <Wallet className="h-3.5 w-3.5" />
+                              <span>Pay Now in Chat ({m.intent.extractedAmount} {m.intent.extractedCurrency || "tUSD8"})</span>
+                              <ArrowRight className="h-3.5 w-3.5" />
+                            </>
+                          ) : (
+                            <>
+                              <Wallet className="h-3.5 w-3.5" />
+                              <span>Connect Wallet to Pay</span>
+                            </>
+                          )}
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleApplyAndPay(m.intent)}
+                          className="w-full py-1.5 px-3 rounded-xl bg-white/[0.03] hover:bg-white/[0.07] text-slate-300 text-[11px] font-medium border border-white/[0.08] transition-colors"
+                        >
+                          Open in /pay Terminal
+                        </button>
+                      </div>
                     </div>
                   )}
                 </div>
