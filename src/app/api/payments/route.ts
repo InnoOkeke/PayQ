@@ -49,11 +49,11 @@ export async function POST(req: NextRequest) {
       senderAddress,
       recipientAddress,
       amount,
-      tokenAddress = "native.near",
+      tokenAddress = "native.tUSD8",
       transactionHash,
       invoiceId,
       invoiceReference,
-      network = "NEAR Testnet",
+      network = "QDay Aevum Testnet",
       chainId = 0,
     } = body;
 
@@ -77,7 +77,7 @@ export async function POST(req: NextRequest) {
         senderAddress: senderAddress.toLowerCase(),
         recipientAddress: recipientAddress.toLowerCase(),
         amount: parseFloat(amount),
-        tokenAddress: tokenAddress || "native.near",
+        tokenAddress: tokenAddress || "native.tUSD8",
         transactionHash,
         invoiceId: invoiceId || null,
         invoiceReference: invoiceReference || null,

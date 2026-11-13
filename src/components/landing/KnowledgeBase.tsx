@@ -47,65 +47,65 @@ const FEATURE_GUIDES: FeatureGuide[] = [
     id: "intent-compiler",
     category: "Payment Intelligence",
     title: "Natural Language Intent Compiler",
-    headline: "Translate human settlement commands into cryptographically verified NEAR transactions.",
+    headline: "Translate human settlement commands into cryptographically verified tUSD8 transactions.",
     description: "Instead of navigating rigid, multi-screen forms, corporate finance teams can specify high-velocity transfers using plain English. The compiler uses deterministic parsing to extract payee address, numeric quantity, and memo metadata, checking every parameter before on-chain authorization.",
     icon: Terminal,
     actionText: "Open Payment Terminal",
     actionHref: "/pay",
     howItWorks: [
       "Natural Language Parsing: Deterministic regex and contextual language models extract the recipient, currency amount, and invoice reference from raw prompts.",
-      "Parameter Normalization: Validates NEAR Account IDs (e.g., correcting common typos like .tesnet to .testnet) and normalizes decimal precision for yoctoNEAR.",
+      "Parameter Normalization: Validates QDay Aevum addresses (e.g., correcting common typos like .tesnet to .testnet) and normalizes decimal precision for tUSD8 base units.",
       "Pre-flight CoP Trigger: Automatically triggers Confirmation of Payee in the background before displaying the compiled execution draft.",
-      "Non-Custodial Wallet Handshake: Handshakes with MyNearWallet for zero-trust cryptographic signature authorization."
+      "Non-Custodial Wallet Handshake: Handshakes with MetaMask / EVM Wallet for zero-trust cryptographic signature authorization."
     ],
     setupSteps: [
       { step: "01", instruction: "Navigate to the Send Payment terminal (/pay)." },
-      { step: "02", instruction: "Type your intent, such as: 'Pay 15 NEAR to acme-design.testnet for Q4 cloud infrastructure'." },
+      { step: "02", instruction: "Type your intent, such as: 'Pay 15 tUSD8 to 0x742d35Cc6634C0532925a3b844Bc454e4438f44e for Q4 cloud infrastructure'." },
       { step: "03", instruction: "Click 'Compile Intent'. The system auto-populates beneficiary, sum, and purpose." },
-      { step: "04", instruction: "Review the real-time Confirmation of Payee verification badge and click 'Authorize on NEAR'." }
+      { step: "04", instruction: "Review the real-time Confirmation of Payee verification badge and click 'Authorize on tUSD8'." }
     ],
     interactiveSample: {
       type: "terminal",
       title: "Sample Compiled Output",
       content: {
-        input: "Disburse 20 NEAR to leprof.testnet for smart contract audit",
-        parsedPayee: "leprof.testnet",
-        parsedAmount: "20.00 NEAR",
+        input: "Disburse 20 tUSD8 to 0x71C8360f3a8b417c805F99D4133A89f07447d251 for smart contract audit",
+        parsedPayee: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
+        parsedAmount: "20.00 tUSD8",
         status: "VERIFIED (LeProf Consulting)",
-        gasCost: "< 0.0005 NEAR (~$0.001)"
+        gasCost: "< 0.0005 tUSD8 (~$0.001)"
       }
     },
-    securityNote: "Your private keys never touch PaySure servers. The compiler only builds the unsigned transaction payload for non-custodial signing."
+    securityNote: "Your private keys never touch PayQ servers. The compiler only builds the unsigned transaction payload for non-custodial signing."
   },
   {
     id: "cop-identity",
     category: "Fraud Prevention",
     title: "Confirmation of Payee & KYC Directory",
     headline: "Prevent invoice fraud, homoglyph attacks, and lookalike domain spoofing.",
-    description: "Confirmation of Payee (CoP) inspects beneficiary NEAR account IDs on-chain prior to dispatch. It cross-references on-chain state with verified legal entities in the PaySure Counterparty Directory to ensure capital is directed to the true corporate beneficiary.",
+    description: "Confirmation of Payee (CoP) inspects beneficiary QDay Aevum addresses on-chain prior to dispatch. It cross-references on-chain state with verified legal entities in the PayQ Counterparty Directory to ensure capital is directed to the true corporate beneficiary.",
     icon: ShieldCheck,
     actionText: "Explore Payee Directory",
     actionHref: "/recipients",
     howItWorks: [
-      "Live NEAR RPC Interrogation: Queries https://rpc.testnet.near.org with view_account to verify the account exists on-chain with active balance.",
+      "Live tUSD8 RPC Interrogation: Queries https://rpc-test.qday.info with view_account to verify the account exists on-chain with active balance.",
       "Typo & Homoglyph Screening: Evaluates Levenshtein edit distance to detect lookalike impostor accounts (e.g., satoshl-dev vs satoshi-dev).",
       "Enterprise KYC Attestation: Matches the account ID against registered corporate identities and flags accounts lacking verified entity documentation.",
       "Name-Match Verification: If an invoice specifies a corporate vendor name, CoP validates that the registered entity name matches the invoice."
     ],
     setupSteps: [
       { step: "01", instruction: "Visit the Confirmation of Payee Directory (/recipients)." },
-      { step: "02", instruction: "Use the Interactive Payee Verification Engine to test any NEAR account ID in real time." },
+      { step: "02", instruction: "Use the Interactive Payee Verification Engine to test any QDay Aevum Address in real time." },
       { step: "03", instruction: "To register your organization or verified vendor, click 'Register New Payee'." },
-      { step: "04", instruction: "Enter the legal business name, unique payment handle, and NEAR account ID to issue an immediate verified attestation." }
+      { step: "04", instruction: "Enter the legal business name, unique payment handle, and QDay Aevum Address to issue an immediate verified attestation." }
     ],
     interactiveSample: {
       type: "cop",
       title: "CoP Live Verification Engine",
       content: {
-        verifiedAccount: "leprof.testnet",
+        verifiedAccount: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
         entity: "LeProf Consulting",
         status: "VERIFIED",
-        typoAlert: "Auto-corrected typo 'leprof.tesnet' -> 'leprof.testnet'",
+        typoAlert: "Auto-corrected typo 'leprof.tesnet' -> '0x71C8360f3a8b417c805F99D4133A89f07447d251'",
         riskLevel: "0.00% Spoof Risk (KYC Attested)"
       }
     },
@@ -115,22 +115,22 @@ const FEATURE_GUIDES: FeatureGuide[] = [
     id: "chain-abstraction",
     category: "Cross-Chain Settlement",
     title: "Multi-Chain Settlement & Chain Abstraction",
-    headline: "Pay any Base, Ethereum, Bitcoin, Solana, Ripple XRP, Cosmos, Stacks, or Stellar address from NEAR.",
-    description: "Powered by NEAR Protocol's decentralized Multi-Party Computation (MPC) network (v1.signer-prod.testnet) and Model A Intent Solver Bridges, PaySure enables corporate finance teams to settle payments across 8 major blockchain ecosystems directly from a single NEAR treasury account. Counterparties receive funds directly in their native wallets without requiring them to create a NEAR account or bridge manually.",
+    headline: "Pay any Base, Ethereum, Bitcoin, Solana, Ripple XRP, Cosmos, Stacks, or Stellar address from tUSD8.",
+    description: "Powered by QDay Aevum's decentralized Multi-Party Computation (MPC) network (0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21) and Model A Intent Solver Bridges, PayQ enables corporate finance teams to settle payments across 8 major blockchain ecosystems directly from a single tUSD8 treasury account. Counterparties receive funds directly in their native wallets without requiring them to create a Aevum Address or bridge manually.",
     icon: Globe,
     actionText: "Send Multi-Chain Payment",
     actionHref: "/pay",
     howItWorks: [
-      "Multi-Chain Address Auto-Detection: Automatically detects address formats for Base/Ethereum (0x...), Bitcoin Native (bc1..., 1..., 3...), Solana (Base58), Ripple XRP (r...), Cosmos Hub (cosmos1...), Stacks L2 (SP...), Stellar (G...), and NEAR Protocol.",
-      "Model A Intent Solver Rail: When paying counterparties who hold external chain wallets, the intent engine locks funds on NEAR and dispatches bridge solvers for seamless delivery.",
-      "Model B Threshold MPC Signatures: For EVM and Bitcoin, NEAR validator nodes run decentralized ECDSA/Ed25519 threshold MPC to sign transactions directly on external chains.",
+      "Multi-Chain Address Auto-Detection: Automatically detects address formats for Base/Ethereum (0x...), Bitcoin Native (bc1..., 1..., 3...), Solana (Base58), Ripple XRP (r...), Cosmos Hub (cosmos1...), Stacks L2 (SP...), Stellar (G...), and QDay Aevum.",
+      "Model A Intent Solver Rail: When paying counterparties who hold external chain wallets, the intent engine locks funds on tUSD8 and dispatches bridge solvers for seamless delivery.",
+      "Model B Threshold MPC Signatures: For EVM and Bitcoin, tUSD8 validator nodes run decentralized ECDSA/Ed25519 threshold MPC to sign transactions directly on external chains.",
       "Multi-Chain Confirmation of Payee (CoP): Validates checksums and cross-references multi-chain corporate vendor records in the directory to prevent fraud."
     ],
     setupSteps: [
       { step: "01", instruction: "Open the Send Payment terminal (/pay) or Recipients directory (/recipients)." },
-      { step: "02", instruction: "Select your destination blockchain pill (NEAR, Base, Ethereum, Bitcoin, Solana, XRP, Cosmos, Stacks, Stellar) or type/paste any chain address." },
-      { step: "03", instruction: "PaySure auto-detects the network, checks the Confirmation of Payee directory, and selects the optimal settlement rail." },
-      { step: "04", instruction: "Authorize the payment in your connected NEAR wallet. The transaction is settled non-custodially to the recipient's chain." }
+      { step: "02", instruction: "Select your destination blockchain pill (tUSD8, Base, Ethereum, Bitcoin, Solana, XRP, Cosmos, Stacks, Stellar) or type/paste any chain address." },
+      { step: "03", instruction: "PayQ auto-detects the network, checks the Confirmation of Payee directory, and selects the optimal settlement rail." },
+      { step: "04", instruction: "Authorize the payment in your connected tUSD8 wallet. The transaction is settled non-custodially to the recipient's chain." }
     ],
     interactiveSample: {
       type: "wallet",
@@ -138,27 +138,27 @@ const FEATURE_GUIDES: FeatureGuide[] = [
       content: {
         destinationAddress: "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4",
         targetNetwork: "Bitcoin (BTC Native) & EVM / Solana / Cosmos / Ripple",
-        settlementRail: "Model A Intent Bridge + NEAR MPC Signatures",
-        sourceNearAccount: "treasury.testnet",
+        settlementRail: "Model A Intent Bridge + tUSD8 MPC Signatures",
+        sourceNearAccount: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
         derivedMpcSigner: "0x456569838f1d43009A91ebA4263147Afd7233483",
         status: "Multi-Chain Clearance Verified"
       }
     },
-    securityNote: "Cross-chain settlements are non-custodial and cryptographically verified. Your organization manages a single NEAR treasury while paying partners on any blockchain."
+    securityNote: "Cross-chain settlements are non-custodial and cryptographically verified. Your organization manages a single tUSD8 treasury while paying partners on any blockchain."
   },
   {
     id: "smart-invoicing",
     category: "Billing Infrastructure",
     title: "Smart Invoicing & Auto-Reconciliation",
     headline: "Institutional invoice generation with embedded cryptographic payment links.",
-    description: "Create, issue, and manage professional enterprise invoices denominated in NEAR or stable assets. Every invoice features an immutable reference ID and a one-click checkout link that pre-configures CoP checks for the sender.",
+    description: "Create, issue, and manage professional enterprise invoices denominated in tUSD8 or stable assets. Every invoice features an immutable reference ID and a one-click checkout link that pre-configures CoP checks for the sender.",
     icon: FileText,
     actionText: "Manage Invoices",
     actionHref: "/invoices",
     howItWorks: [
-      "Cryptographic Invoicing: Generates auditable digital invoices tied directly to your verified NEAR corporate account.",
+      "Cryptographic Invoicing: Generates auditable digital invoices tied directly to your verified tUSD8 corporate account.",
       "Embedded CoP Verification: Shareable invoice links (/pay?invoiceId=...) automatically load beneficiary parameters and verify the payee on-chain.",
-      "Instant Settlement Detection: Once the payer signs on NEAR Testnet, the transaction hash is recorded, updating invoice status from PENDING to PAID in real time.",
+      "Instant Settlement Detection: Once the payer signs on QDay Aevum Testnet, the transaction hash is recorded, updating invoice status from PENDING to PAID in real time.",
       "Accounting Export: Download structured audit receipts and reconciliation files for institutional ERP systems."
     ],
     setupSteps: [
@@ -173,12 +173,12 @@ const FEATURE_GUIDES: FeatureGuide[] = [
       content: {
         invoiceNumber: "INV-2026-0042",
         recipient: "Acme Web3 Design Studio",
-        amount: "50 NEAR",
+        amount: "50 tUSD8",
         status: "AUTO-RECONCILED ON-CHAIN",
-        receiptHash: "7b4c...9f2a (NEAR Testnet)"
+        receiptHash: "7b4c...9f2a (QDay Aevum Testnet)"
       }
     },
-    securityNote: "Every settled invoice links directly to the NEAR block explorer for permanent, tamper-proof proof of payment."
+    securityNote: "Every settled invoice links directly to the tUSD8 block explorer for permanent, tamper-proof proof of payment."
   },
   {
     id: "treasury-governance",
@@ -191,7 +191,7 @@ const FEATURE_GUIDES: FeatureGuide[] = [
     actionHref: "/treasury",
     howItWorks: [
       "Balance & Velocity Tracking: Live telemetry monitors total treasury reserves across connected enterprise accounts.",
-      "Threshold Enforcement: Transactions exceeding defined policy limits (e.g., > 50 NEAR) automatically mandate secondary approver authorization.",
+      "Threshold Enforcement: Transactions exceeding defined policy limits (e.g., > 50 tUSD8) automatically mandate secondary approver authorization.",
       "Role-Based Governance: Distinguishes between Operator (initiator) and Approver (treasury officer) keys.",
       "Risk Scoring Engine: Flags out-of-schedule velocity spikes or transfers to novel counterparties."
     ],
@@ -205,9 +205,9 @@ const FEATURE_GUIDES: FeatureGuide[] = [
       type: "policy",
       title: "Active Policy Guardrails",
       content: {
-        singleTransferLimit: "50.00 NEAR (Requires Single Signature)",
-        thresholdTier2: "> 50.00 NEAR (Dual-Executive Sign-Off)",
-        dailyVelocityCeiling: "250.00 NEAR",
+        singleTransferLimit: "50.00 tUSD8 (Requires Single Signature)",
+        thresholdTier2: "> 50.00 tUSD8 (Dual-Executive Sign-Off)",
+        dailyVelocityCeiling: "250.00 tUSD8",
         status: "Active & Enforced On-Chain"
       }
     },
@@ -218,12 +218,12 @@ const FEATURE_GUIDES: FeatureGuide[] = [
     category: "Compliance & Reporting",
     title: "Cryptographic Ledger & Audit Trail",
     headline: "Exportable, immutable proof of transfer for tax, compliance, and audits.",
-    description: "Every payment settled through PaySure is logged with its NEAR blockchain block height, transaction hash, CoP verification status, and invoice reference for seamless regulatory auditing.",
+    description: "Every payment settled through PayQ is logged with its tUSD8 blockchain block height, transaction hash, CoP verification status, and invoice reference for seamless regulatory auditing.",
     icon: History,
     actionText: "Open Transaction Ledger",
     actionHref: "/history",
     howItWorks: [
-      "On-Chain Immutability: Reads final transaction receipts directly from NEAR Testnet RPC.",
+      "On-Chain Immutability: Reads final transaction receipts directly from QDay Aevum Testnet RPC.",
       "Dual Identity Tagging: Binds anonymous wallet addresses to human-readable counterparties and verified legal entities.",
       "Audit Certificate Generation: Generates verifiable receipt objects including gas metrics, timestamps, and sender/beneficiary signatures.",
       "ERP Compatibility: Filter and export transaction histories to CSV or JSON formats for downstream accounting."
@@ -232,84 +232,84 @@ const FEATURE_GUIDES: FeatureGuide[] = [
       { step: "01", instruction: "Visit the Ledger (/history) or Transactions tab." },
       { step: "02", instruction: "Filter records by date range, counterparty, or verification tier." },
       { step: "03", instruction: "Click any transaction row to inspect the full cryptographic receipt." },
-      { step: "04", instruction: "Click the NEAR Explorer link to inspect raw state execution on-chain." }
+      { step: "04", instruction: "Click the tUSD8 Explorer link to inspect raw state execution on-chain." }
     ],
     interactiveSample: {
       type: "wallet",
       title: "Verified Audit Record",
       content: {
         hash: "Dq9v...8x1k",
-        sender: "my-corporate-treasury.testnet",
-        recipient: "leprof.testnet (LeProf Consulting)",
+        sender: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+        recipient: "0x71C8360f3a8b417c805F99D4133A89f07447d251 (LeProf Consulting)",
         finalityTime: "1.1 seconds",
         attestation: "CoP Passed · Tier-1 Verified"
       }
     },
-    securityNote: "Auditors can independently verify transactions on NEAR Testnet explorer without requiring privileged access to PaySure databases."
+    securityNote: "Auditors can independently verify transactions on QDay Aevum Testnet explorer without requiring privileged access to PayQ databases."
   },
   {
-    id: "near-testnet-setup",
+    id: "tUSD8-testnet-setup",
     category: "Getting Started",
-    title: "NEAR Testnet Wallet & Faucet Setup",
+    title: "QDay Aevum Testnet Wallet & Faucet Setup",
     headline: "Get started in 60 seconds with testnet tokens and zero financial risk.",
-    description: "PaySure runs natively on NEAR Testnet. You can test complete corporate payment workflows, invoice settlement, and Confirmation of Payee without risking real treasury capital.",
+    description: "PayQ runs natively on QDay Aevum Testnet. You can test complete corporate payment workflows, invoice settlement, and Confirmation of Payee without risking real treasury capital.",
     icon: Wallet,
     actionText: "Open Testnet Wallet",
-    actionHref: "https://testnet.mynearwallet.com",
+    actionHref: "https://testnet.MetaMask / EVM Wallet.com",
     howItWorks: [
-      "MyNearWallet Integration: Connect directly using standard non-custodial browser wallet sessions.",
+      "MetaMask / EVM Wallet Integration: Connect directly using standard non-custodial browser wallet sessions.",
       "Free Testnet Funding: Testnet accounts can be created and topped up for free in seconds.",
-      "Sub-Second Execution: NEAR Testnet mirrors mainnet block production (~1 second finality with ~0.0001 NEAR gas fees)."
+      "Sub-Second Execution: QDay Aevum Testnet mirrors mainnet block production (~1 second finality with ~0.0001 tUSD8 gas fees)."
     ],
     setupSteps: [
-      { step: "01", instruction: "Visit testnet.mynearwallet.com and create a free testnet account (e.g., yourcompany.testnet)." },
-      { step: "02", instruction: "Your wallet comes pre-funded with testnet NEAR. If you need more, use the official NEAR faucet." },
-      { step: "03", instruction: "Return to PaySure and click 'Connect Wallet' in the top navigation bar." },
+      { step: "01", instruction: "Visit testnet.MetaMask / EVM Wallet.com and create a free testnet account (e.g., your0x742d35Cc6634C0532925a3b844Bc454e4438f44e)." },
+      { step: "02", instruction: "Your wallet comes pre-funded with testnet tUSD8. If you need more, use the official tUSD8 faucet." },
+      { step: "03", instruction: "Return to PayQ and click 'Connect Wallet' in the top navigation bar." },
       { step: "04", instruction: "Authorize the session to start sending verified payments and issuing invoices." }
     ],
     interactiveSample: {
       type: "wallet",
       title: "Testnet Environment",
       content: {
-        network: "NEAR Testnet",
-        rpcEndpoint: "https://rpc.testnet.near.org",
-        walletPortal: "testnet.mynearwallet.com",
+        network: "QDay Aevum Testnet",
+        rpcEndpoint: "https://rpc-test.qday.info",
+        walletPortal: "testnet.MetaMask / EVM Wallet.com",
         blockFinality: "~1.1s",
-        gasAverage: "0.0002 NEAR"
+        gasAverage: "0.0002 tUSD8"
       }
     },
-    securityNote: "Ensure your wallet URL starts with testnet.mynearwallet.com. Never enter private seed phrases on any website."
+    securityNote: "Ensure your wallet URL starts with testnet.MetaMask / EVM Wallet.com. Never enter private seed phrases on any website."
   }
 ];
 
 const FAQS = [
   {
     question: "Can I send money to Ethereum, Bitcoin, Solana, XRP, Cosmos, and other chains?",
-    answer: "Yes! PaySure supports comprehensive multi-chain settlement powered by NEAR Protocol's decentralized Chain Abstraction stack. You can disburse payments to Ethereum/Base (0x...), Bitcoin Native (bc1...), Solana (Base58), Ripple (XRP), Cosmos Hub (cosmos1...), Stacks L2 (SP...), and Stellar (G...). You can also type natural language commands such as 'Pay 50 NEAR to LeProf on Base network' or 'Transfer 20 NEAR to Satoshi on Bitcoin'. Settlement is executed non-custodially from your connected NEAR account without having to manage separate wallets or foreign gas tokens."
+    answer: "Yes! PayQ supports comprehensive multi-chain settlement powered by QDay Aevum's decentralized Chain Abstraction stack. You can disburse payments to Ethereum/Base (0x...), Bitcoin Native (bc1...), Solana (Base58), Ripple (XRP), Cosmos Hub (cosmos1...), Stacks L2 (SP...), and Stellar (G...). You can also type natural language commands such as 'Pay 50 tUSD8 to LeProf on Base network' or 'Transfer 20 tUSD8 to Satoshi on Bitcoin'. Settlement is executed non-custodially from your connected Aevum Address without having to manage separate wallets or foreign gas tokens."
   },
   {
     question: "What is Model A vs Model B in cross-chain settlement?",
-    answer: "Model A (Intent-Driven Cross-Chain Settlement & Solver Rail) allows you to pay counterparties who already maintain external wallets (e.g. an agency that invoices with an Ethereum, Solana, or Bitcoin address) without requiring them to set up a NEAR account. Funds are locked on NEAR and fulfilled on the target chain. Model B (NEAR MPC Chain Signatures) uses NEAR's decentralized threshold network (v1.signer-prod.testnet) to derive cryptographic signers directly from your NEAR account, allowing your NEAR treasury to sign and broadcast raw transactions on external chains."
+    answer: "Model A (Intent-Driven Cross-Chain Settlement & Solver Rail) allows you to pay counterparties who already maintain external wallets (e.g. an agency that invoices with an Ethereum, Solana, or Bitcoin address) without requiring them to set up a Aevum Address. Funds are locked on tUSD8 and fulfilled on the target chain. Model B (tUSD8 MPC Chain Signatures) uses tUSD8's decentralized threshold network (0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21) to derive cryptographic signers directly from your Aevum Address, allowing your tUSD8 treasury to sign and broadcast raw transactions on external chains."
   },
   {
     question: "What is Confirmation of Payee (CoP) and why is it necessary for crypto?",
-    answer: "In traditional banking, Confirmation of Payee verifies that the account name matches the account number before a wire is executed. In Web3, blockchain transactions are irreversible: sending funds to a spoofed address or typosquatted account (like leprof.tesnet instead of leprof.testnet) results in permanent capital loss. PaySure's CoP verifies the account on-chain and validates corporate KYC attestations before you sign."
+    answer: "In traditional banking, Confirmation of Payee verifies that the account name matches the account number before a wire is executed. In Web3, blockchain transactions are irreversible: sending funds to a spoofed address or typosquatted account (like leprof.tesnet instead of 0x71C8360f3a8b417c805F99D4133A89f07447d251) results in permanent capital loss. PayQ's CoP verifies the account on-chain and validates corporate KYC attestations before you sign."
   },
   {
     question: "Why did I see 'Unregistered or High Risk: No business KYC attestation filed'?",
-    answer: "This notification occurs when a recipient account exists on NEAR Testnet (confirmed on-chain with balance) but has not yet filed a legal business attestation in PaySure's counterparty directory. To attest a business or counterparty, visit the Recipients directory (/recipients) and click 'Register New Payee' to establish a verified KYC record."
+    answer: "This notification occurs when a recipient account exists on QDay Aevum Testnet (confirmed on-chain with balance) but has not yet filed a legal business attestation in PayQ's counterparty directory. To attest a business or counterparty, visit the Recipients directory (/recipients) and click 'Register New Payee' to establish a verified KYC record."
   },
   {
-    question: "Does PaySure have custody of my corporate funds?",
-    answer: "No. PaySure is 100% non-custodial. We never hold your private keys, seed phrases, or funds. PaySure compiles intents, validates counterparties, and generates transaction payloads that you authorize directly through your connected NEAR wallet (such as MyNearWallet)."
+    question: "Does PayQ have custody of my corporate funds?",
+    answer: "No. PayQ is 100% non-custodial. We never hold your private keys, seed phrases, or funds. PayQ compiles intents, validates counterparties, and generates transaction payloads that you authorize directly through your connected tUSD8 wallet (such as MetaMask / EVM Wallet)."
   },
   {
     question: "How does the Natural Language Payment Compiler handle typos?",
-    answer: "The compiler automatically checks and normalizes addresses. For instance, if you type 'leprof.tesnet', the system identifies the common testnet suffix typo and queries NEAR RPC to confirm the canonical address 'leprof.testnet'. It then alerts you with Confirmation of Payee before you approve the payment."
+    answer: "The compiler automatically checks and normalizes addresses. For instance, if you type 'leprof.tesnet', the system identifies the common testnet suffix typo and queries tUSD8 RPC to confirm the canonical address '0x71C8360f3a8b417c805F99D4133A89f07447d251'. It then alerts you with Confirmation of Payee before you approve the payment."
   },
   {
-    question: "Can I use PaySure for team disbursements and vendor invoices?",
-    answer: "Yes. PaySure was specifically designed for Web3 startups, DAOs, and corporate treasuries that disburse payments to contractors, agencies, and infrastructure providers. You can create invoices, manage a directory of verified vendors, and enforce spending limits."
+    question: "Can I use PayQ for team disbursements and vendor invoices?",
+    answer: "Yes. PayQ was specifically designed for Web3 startups, DAOs, and corporate treasuries that disburse payments to contractors, agencies, and infrastructure providers. You can create invoices, manage a directory of verified vendors, and enforce spending limits."
   }
 ];
 
@@ -363,7 +363,7 @@ export function KnowledgeBase() {
               <span className="text-zinc-500">Configure with confidence.</span>
             </h2>
             <p className="mt-4 text-base text-zinc-400 leading-relaxed font-normal">
-              A comprehensive technical guide to PaySure's verification primitives, intent compiler, invoicing protocols, and corporate treasury policies.
+              A comprehensive technical guide to PayQ's verification primitives, intent compiler, invoicing protocols, and corporate treasury policies.
             </p>
           </div>
 
@@ -412,7 +412,7 @@ export function KnowledgeBase() {
                   {selectedGuide.category}
                 </span>
                 <span className="text-zinc-600">·</span>
-                <span className="text-xs text-zinc-500 font-mono">NEAR Protocol Testnet</span>
+                <span className="text-xs text-zinc-500 font-mono">QDay Aevum Testnet</span>
               </div>
               <h3 className="text-2xl sm:text-3xl font-semibold text-white tracking-[-0.02em]">
                 {selectedGuide.title}
@@ -580,7 +580,7 @@ export function KnowledgeBase() {
               Ready to verify a counterparty or send a payment?
             </h4>
             <p className="text-xs text-zinc-400">
-              Test on NEAR Testnet with zero risk using verified seed addresses like leprof.testnet or acme-design.testnet.
+              Test on QDay Aevum Testnet with zero risk using verified seed addresses like 0x71C8360f3a8b417c805F99D4133A89f07447d251 or 0x742d35Cc6634C0532925a3b844Bc454e4438f44e.
             </p>
           </div>
           <div className="flex items-center gap-3">

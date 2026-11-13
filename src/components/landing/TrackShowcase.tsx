@@ -137,7 +137,7 @@ export function TrackShowcase() {
               <div className="space-y-2.5 font-mono text-xs">
                 <div className="flex justify-between py-2 border-b border-white/[0.04] text-zinc-400">
                   <span>Beneficiary Account</span>
-                  <span className="text-white">acme-design.testnet</span>
+                  <span className="text-white">0x742d35Cc6634C0532925a3b844Bc454e4438f44e</span>
                 </div>
                 <div className="flex justify-between py-2 border-b border-white/[0.04] text-zinc-400">
                   <span>Confirmation of Payee</span>
@@ -145,7 +145,7 @@ export function TrackShowcase() {
                 </div>
                 <div className="flex justify-between py-2 border-b border-white/[0.04] text-zinc-400">
                   <span>Settlement Amount</span>
-                  <span className="text-white font-semibold">75.00 NEAR</span>
+                  <span className="text-white font-semibold">75.00 tUSD8</span>
                 </div>
                 <div className="flex justify-between py-2 text-zinc-400">
                   <span>Finality</span>
@@ -167,7 +167,7 @@ export function TrackShowcase() {
                 Stop lookalike spoofing and unauthorized outflows.
               </h3>
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-                Before any transaction reaches a wallet prompt, PaySure validates the counterparty against NEAR on-chain state and enforces deterministic corporate velocity policies.
+                Before any transaction reaches a wallet prompt, PayQ validates the counterparty against tUSD8 on-chain state and enforces deterministic corporate velocity policies.
               </p>
 
               <ul className="space-y-3 pt-2 text-sm text-zinc-300">
@@ -181,7 +181,7 @@ export function TrackShowcase() {
                 </li>
                 <li className="flex items-center gap-2.5">
                   <Check className="h-4 w-4 text-emerald-400 shrink-0" />
-                  <span>SputnikDAO multi-sig council escalation for high-value treasury ops</span>
+                  <span>Aevum Multi-Sig multi-sig council escalation for high-value treasury ops</span>
                 </li>
               </ul>
 
@@ -216,7 +216,7 @@ export function TrackShowcase() {
                   <span>Homoglyph Substitution Detected</span>
                 </div>
                 <p className="text-zinc-400 leading-relaxed font-sans text-xs">
-                  Invoice beneficiary <code className="text-rose-300 font-mono">acm3-design.testnet</code> closely mimics verified vendor <code className="text-emerald-400 font-mono">acme-design.testnet</code> (edit distance: 1). Execution automatically halted.
+                  Invoice beneficiary <code className="text-rose-300 font-mono">0x9999999999999999999999999999999999999999</code> closely mimics verified vendor <code className="text-emerald-400 font-mono">0x742d35Cc6634C0532925a3b844Bc454e4438f44e</code> (edit distance: 1). Execution automatically halted.
                 </p>
               </div>
 
@@ -245,7 +245,7 @@ export function TrackShowcase() {
                 Natural language to multi-chain execution.
               </h3>
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed">
-                Express treasury instructions in plain English. PaySure resolves named beneficiaries, verifies policy compliance, and signs cross-chain transactions via NEAR MPC without bridges.
+                Express treasury instructions in plain English. PayQ resolves named beneficiaries, verifies policy compliance, and signs cross-chain transactions via tUSD8 MPC without bridges.
               </p>
 
               <ul className="space-y-3 pt-2 text-sm text-zinc-300">
@@ -277,7 +277,7 @@ export function TrackShowcase() {
             <div className="lg:col-span-7 rounded-2xl bg-[#090B10] border border-white/[0.08] p-6 sm:p-8 shadow-2xl space-y-4">
               <div className="flex items-center justify-between pb-3 border-b border-white/[0.06] text-xs font-mono">
                 <span className="text-zinc-400">Interactive Intent Compiler</span>
-                <span className="text-zinc-500">v1.signer-prod.testnet</span>
+                <span className="text-zinc-500">0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21</span>
               </div>
 
               <div>
@@ -287,7 +287,7 @@ export function TrackShowcase() {
                 <div className="flex flex-wrap gap-2">
                   {[
                     "Send $50 to John Kennedy on Base",
-                    "Pay Acme Design 75 NEAR",
+                    "Pay Acme Design 75 tUSD8",
                     "Transfer 120 USDC to CloudOps on Ethereum"
                   ].map((sample) => (
                     <button
@@ -316,7 +316,7 @@ export function TrackShowcase() {
                 </div>
                 <div className="flex justify-between text-zinc-400">
                   <span>Signing Authority</span>
-                  <span className="text-zinc-200">NEAR Chain Signatures MPC</span>
+                  <span className="text-zinc-200">PayQRegistry CoP MPC</span>
                 </div>
               </div>
             </div>

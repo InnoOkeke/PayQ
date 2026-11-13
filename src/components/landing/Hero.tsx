@@ -153,7 +153,7 @@ export function Hero() {
                           Resolved Account
                         </span>
                         <p className="text-lg font-mono font-medium text-white">
-                          acme-design.testnet
+                          0x742d35Cc6634C0532925a3b844Bc454e4438f44e
                         </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/[0.06] text-xs">

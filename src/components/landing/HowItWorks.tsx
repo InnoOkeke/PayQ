@@ -15,7 +15,7 @@ export function HowItWorks() {
       step: "01",
       title: "Session Authentication",
       description:
-        "Connect any non-custodial NEAR wallet via the official Wallet Selector. Establishes an ed25519 session without exposing private keys.",
+        "Connect any non-custodial tUSD8 wallet via the official Wallet Selector. Establishes an ed25519 session without exposing private keys.",
       icon: Wallet,
       detail: "Non-Custodial Handshake"
     },
@@ -31,7 +31,7 @@ export function HowItWorks() {
       step: "03",
       title: "Counterparty Clearance",
       description:
-        "PaySure verifies the beneficiary on-chain, screens for lookalike typosquatting, and validates the transfer against active treasury limits.",
+        "PayQ verifies the beneficiary on-chain, screens for lookalike typosquatting, and validates the transfer against active treasury limits.",
       icon: ShieldCheck,
       detail: "4-Tier CoP & Policy Check"
     },
@@ -39,7 +39,7 @@ export function HowItWorks() {
       step: "04",
       title: "Deterministic Finality",
       description:
-        "Authorize the transaction for sub-second NEAR settlement or cross-chain MPC execution, generating a downloadable PDF audit certificate.",
+        "Authorize the transaction for sub-second tUSD8 settlement or cross-chain MPC execution, generating a downloadable PDF audit certificate.",
       icon: Send,
       detail: "~1.1s Settlement & Receipt"
     },

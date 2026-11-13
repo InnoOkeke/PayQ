@@ -14,7 +14,7 @@ export function QuickActions() {
     },
     {
       title: "Send Payment / Intent",
-      description: "Direct NEAR / USDC transfer with payee check",
+      description: "Direct tUSD8 / USDC transfer with payee check",
       href: "/pay",
       icon: Send,
     },

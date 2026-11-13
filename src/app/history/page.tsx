@@ -103,7 +103,7 @@ export default function HistoryPage() {
             {isConnected ? (
               <span>Scoped to connected account: <strong className="text-brand-300 font-mono">{accountId}</strong></span>
             ) : (
-              <span>Complete verifiable ledger of payments executed on NEAR Protocol.</span>
+              <span>Complete verifiable ledger of payments executed on QDay Aevum.</span>
             )}
           </p>
         </div>
@@ -170,7 +170,7 @@ export default function HistoryPage() {
             {isConnected ? (
               <span>Your connected wallet (<strong>{accountId}</strong>) has not executed any payments yet.</span>
             ) : (
-              <span>Connect your NEAR wallet to view your personalized payment history and download receipts.</span>
+              <span>Connect your tUSD8 wallet to view your personalized payment history and download receipts.</span>
             )}
           </p>
         </div>
@@ -206,7 +206,7 @@ export default function HistoryPage() {
                   <span>&bull;</span>
                   <span>{new Date(p.createdAt).toLocaleString()}</span>
                   <span>&bull;</span>
-                  <span className="text-emerald-400">NEAR Protocol</span>
+                  <span className="text-emerald-400">QDay Aevum</span>
                 </div>
               </div>
 

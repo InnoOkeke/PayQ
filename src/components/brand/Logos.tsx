@@ -56,6 +56,5 @@ export function PayQLogo({ className = "h-9 w-9", size = 36 }: LogoProps) {
 }
 
 // Backward-compatible aliases
-export const PaySureLogo = PayQLogo;
 export const LogoAiGateway = PayQLogo;
 export const LogoVerifiedShield = PayQLogo;

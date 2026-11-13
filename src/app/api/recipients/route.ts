@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
     if (!displayName || !walletAddress) {
       return NextResponse.json(
-        { error: "Display name and primary NEAR account ID are required." },
+        { error: "Display name and primary QDay Aevum Address are required." },
         { status: 400 }
       );
     }

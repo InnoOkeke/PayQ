@@ -10,7 +10,7 @@ export async function POST() {
       where: {
         payment: {
           senderAddress: {
-            in: ["paysure-treasury.testnet", "company.testnet", "demo.testnet"],
+            in: ["PayQ-0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "0x1234567890123456789012345678901234567890"],
           },
         },
       },
@@ -19,23 +19,23 @@ export async function POST() {
     await prisma.payment.deleteMany({
       where: {
         senderAddress: {
-          in: ["paysure-treasury.testnet", "company.testnet", "demo.testnet"],
+          in: ["PayQ-0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "0x742d35Cc6634C0532925a3b844Bc454e4438f44e", "0x1234567890123456789012345678901234567890"],
         },
       },
     });
 
-    // 1. Seed Verified Recipients with NEAR Named Accounts for Confirmation of Payee
+    // 1. Seed Verified Recipients on QDay Aevum Testnet for Confirmation of Payee
     const r1 = await prisma.recipient.upsert({
       where: { paymentId: "acme-design" },
       create: {
         displayName: "Acme Web3 Design Studio",
         paymentId: "acme-design",
-        walletAddress: "acme-design.testnet",
+        walletAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
         verificationStatus: "VERIFIED",
-        notes: "Official NEAR Ecosystem Design Partner.",
+        notes: "Official QDay Aevum Design Partner.",
       },
       update: {
-        walletAddress: "acme-design.testnet",
+        walletAddress: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
         verificationStatus: "VERIFIED",
       },
     });
@@ -45,12 +45,12 @@ export async function POST() {
       create: {
         displayName: "Satoshi Freelance Engineering",
         paymentId: "satoshi-dev",
-        walletAddress: "satoshi-dev.testnet",
+        walletAddress: "0x1234567890123456789012345678901234567890",
         verificationStatus: "VERIFIED",
-        notes: "Smart Contract auditor & Rust / NEAR systems specialist.",
+        notes: "Post-quantum Solidity & EVM systems auditor.",
       },
       update: {
-        walletAddress: "satoshi-dev.testnet",
+        walletAddress: "0x1234567890123456789012345678901234567890",
         verificationStatus: "VERIFIED",
       },
     });
@@ -60,12 +60,12 @@ export async function POST() {
       create: {
         displayName: "Apex Media Agency",
         paymentId: "apex-media",
-        walletAddress: "apex-media.testnet",
+        walletAddress: "0x9999999999999999999999999999999999999999",
         verificationStatus: "WARNING",
         notes: "Recent key rotation reported by payee. Exercise caution.",
       },
       update: {
-        walletAddress: "apex-media.testnet",
+        walletAddress: "0x9999999999999999999999999999999999999999",
         verificationStatus: "WARNING",
       },
     });
@@ -78,9 +78,9 @@ export async function POST() {
         recipientName: r1.displayName,
         recipientAddress: r1.walletAddress,
         amount: 75.0,
-        token: "NEAR",
+        token: "tUSD8",
         dueDate: "2026-11-20",
-        description: "UI/UX Brand Design & Frontend Systems on NEAR",
+        description: "UI/UX Brand Design & Frontend Systems on tUSD8",
         status: "PENDING",
       },
     });
@@ -92,16 +92,16 @@ export async function POST() {
         recipientName: r2.displayName,
         recipientAddress: r2.walletAddress,
         amount: 120.0,
-        token: "NEAR",
+        token: "tUSD8",
         dueDate: "2026-11-25",
-        description: "NEAR Smart Contract Rust Security Audit",
+        description: "tUSD8 Smart Contract Rust Security Audit",
         status: "PENDING",
       },
     });
 
     return NextResponse.json({
       success: true,
-      message: "Database seeded with clean NEAR recipient registry. Zero demo payments, 100% real on-chain actions.",
+      message: "Database seeded with clean tUSD8 recipient registry. Zero demo payments, 100% real on-chain actions.",
       data: {
         recipients: [r1, r2, r3],
         invoices: [inv1, inv2],

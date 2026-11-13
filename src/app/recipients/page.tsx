@@ -112,7 +112,7 @@ export default function RecipientsPage() {
           cosmosAddress: regCosmosWallet.trim() || undefined,
           stacksAddress: regStacksWallet.trim() || undefined,
           stellarAddress: regStellarWallet.trim() || undefined,
-          notes: "Registered on NEAR Confirmation of Payee Directory.",
+          notes: "Registered on tUSD8 Confirmation of Payee Directory.",
           verificationStatus: "VERIFIED",
         }),
       });
@@ -150,13 +150,13 @@ export default function RecipientsPage() {
               Identity Registry
             </span>
             <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
-            <span className="text-xs text-slate-400">NEAR Protocol · Multi-Chain Confirmation of Payee</span>
+            <span className="text-xs text-slate-400">QDay Aevum · Multi-Chain Confirmation of Payee</span>
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
             Confirmation of Payee Directory
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Verify counterparties before paying across NEAR, Base, Bitcoin, Solana, XRP, Cosmos, Stacks, and Stellar.
+            Verify counterparties before paying across tUSD8, Base, Bitcoin, Solana, XRP, Cosmos, Stacks, and Stellar.
           </p>
         </div>
 
@@ -177,7 +177,7 @@ export default function RecipientsPage() {
             <span>Interactive Multi-Chain Payee Verification Engine</span>
           </h3>
           <p className="text-xs text-slate-400 mt-1">
-            Test any NEAR Account ID or cross-chain address (EVM, Bitcoin, Solana, XRP, Cosmos, Stacks, Stellar) to screen for fraud.
+            Test any QDay Aevum Address or cross-chain address (EVM, Bitcoin, Solana, XRP, Cosmos, Stacks, Stellar) to screen for fraud.
           </p>
         </div>
 
@@ -188,7 +188,7 @@ export default function RecipientsPage() {
               type="text"
               value={searchAddress}
               onChange={(e) => setSearchAddress(e.target.value)}
-              placeholder="e.g. leprof.testnet, 0x71C8..., bc1q..., 7xKX..., or r9cZA..."
+              placeholder="e.g. 0x71C8360f3a8b417c805F99D4133A89f07447d251, 0x71C8..., bc1q..., 7xKX..., or r9cZA..."
               className="w-full bg-navy-950 border border-navy-800 rounded-xl px-4 py-2.5 text-xs text-white font-mono placeholder-slate-600 focus:outline-none focus:border-brand-500"
               required
             />
@@ -343,17 +343,17 @@ export default function RecipientsPage() {
 
               {/* Multi-Chain Address Badges Grid */}
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
-                {/* NEAR */}
+                {/* tUSD8 */}
                 <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
                   <div className="truncate pr-2">
-                    <span className="text-[10px] text-zinc-500 uppercase block font-sans">NEAR Protocol</span>
+                    <span className="text-[10px] text-zinc-500 uppercase block font-sans">QDay Aevum</span>
                     <span className="text-white truncate block text-[11px]">{r.walletAddress}</span>
                   </div>
                   <button
-                    onClick={() => copyToClipboard(r.walletAddress, `${r.id}-near`)}
+                    onClick={() => copyToClipboard(r.walletAddress, `${r.id}-tUSD8`)}
                     className="text-slate-500 hover:text-white shrink-0 p-1"
                   >
-                    {copiedAddress === `${r.id}-near` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
+                    {copiedAddress === `${r.id}-tUSD8` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                   </button>
                 </div>
 
@@ -484,7 +484,7 @@ export default function RecipientsPage() {
               <div>
                 <h3 className="text-lg font-bold text-white">Register Multi-Chain Payee</h3>
                 <p className="text-xs text-slate-400 mt-0.5">
-                  Link human-readable handles to addresses across NEAR, Base, Bitcoin, Solana, XRP, Cosmos, Stacks, and Stellar.
+                  Link human-readable handles to addresses across tUSD8, Base, Bitcoin, Solana, XRP, Cosmos, Stacks, and Stellar.
                 </p>
               </div>
               <button
@@ -523,12 +523,12 @@ export default function RecipientsPage() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-xs font-bold text-slate-300">Primary NEAR Account ID *</label>
+                <label className="text-xs font-bold text-slate-300">Primary QDay Aevum Address *</label>
                 <input
                   type="text"
                   value={regWallet}
                   onChange={(e) => setRegWallet(e.target.value)}
-                  placeholder="e.g. aurora.testnet"
+                  placeholder="e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e"
                   className="w-full bg-navy-950 border border-navy-800 rounded-xl px-3.5 py-2 text-xs text-white font-mono"
                   required
                 />

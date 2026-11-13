@@ -23,10 +23,10 @@ import { DEFAULT_TREASURY_POLICY } from "@/lib/treasury/policyEngine";
 import { buildSputnikTransferProposal, DEFAULT_SPUTNIK_DAO } from "@/lib/treasury/sputnikDao";
 import { evaluateOutlayerPolicy } from "@/lib/security/outlayer";
 import { formatCurrency } from "@/lib/utils";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { useWallet } from "@/context/WalletContext";
 
 export default function TreasuryPage() {
-  const { accountId } = useNearWallet();
+  const { accountId } = useWallet();
   const [maxSingleTx, setMaxSingleTx] = useState(DEFAULT_TREASURY_POLICY.maxSingleTxAmountUSD);
   const [dailyCap, setDailyCap] = useState(DEFAULT_TREASURY_POLICY.dailyVelocityCapUSD);
   const [autoApproveUnder, setAutoApproveUnder] = useState(DEFAULT_TREASURY_POLICY.autoApproveVerifiedUnderUSD);
@@ -76,7 +76,7 @@ export default function TreasuryPage() {
   const reputationLeaderboard = [
     {
       name: "John Kennedy",
-      account: "john-kennedy.testnet",
+      account: "0x71C8360f3a8b417c805F99D4133A89f07447d251",
       evm: "0x71C8...d251 (Base)",
       reputationScore: 98,
       status: "VERIFIED",
@@ -85,7 +85,7 @@ export default function TreasuryPage() {
     },
     {
       name: "Acme Web3 Design Studio",
-      account: "acme-design.testnet",
+      account: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
       evm: "0x4565...3483 (Ethereum)",
       reputationScore: 95,
       status: "VERIFIED",
@@ -94,7 +94,7 @@ export default function TreasuryPage() {
     },
     {
       name: "Satoshi Freelance Engineering",
-      account: "satoshi-dev.testnet",
+      account: "0x1234567890123456789012345678901234567890",
       evm: "0x1234...7890 (Arbitrum)",
       reputationScore: 85,
       status: "VERIFIED",
@@ -103,7 +103,7 @@ export default function TreasuryPage() {
     },
     {
       name: "Spoofed / Typosquat Lookalike",
-      account: "satosh1-dev.testnet",
+      account: "0x9999999999999999999999999999999999999999",
       evm: "0x9999...9999 (Phishing)",
       reputationScore: 12,
       status: "MISMATCH",
@@ -115,7 +115,7 @@ export default function TreasuryPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!accountId) {
-      setPolicyError("Connect your NEAR wallet to persist treasury policy.");
+      setPolicyError("Connect your tUSD8 wallet to persist treasury policy.");
       return;
     }
 
@@ -156,7 +156,7 @@ export default function TreasuryPage() {
     const next = !killswitch;
     setKillswitch(next);
     if (!accountId) {
-      setPolicyError("Connect your NEAR wallet to persist the killswitch state.");
+      setPolicyError("Connect your tUSD8 wallet to persist the killswitch state.");
       return;
     }
 
@@ -182,10 +182,10 @@ export default function TreasuryPage() {
     const proposal = buildSputnikTransferProposal({
       daoContract: DEFAULT_SPUTNIK_DAO,
       description: "Approve high-value invoice INV-2026-9042 for Acme Design Studio",
-      receiverId: "acme-design.testnet",
+      receiverId: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
       amountNear: 75,
     });
-    setSputnikSuccess(`Proposal drafted for ${proposal.contractId}: methodName='${proposal.methodName}' with 0.1 NEAR bond.`);
+    setSputnikSuccess(`Proposal drafted for ${proposal.contractId}: methodName='${proposal.methodName}' with 0.1 tUSD8 bond.`);
     setTimeout(() => setSputnikSuccess(null), 6000);
   };
 
@@ -196,7 +196,7 @@ export default function TreasuryPage() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <span className="text-xs font-semibold uppercase tracking-wider text-brand-400">
-              AI Security, SputnikDAO &amp; OutLayer
+              AI Security, Aevum Multi-Sig &amp; OutLayer
             </span>
             <span className="h-1.5 w-1.5 rounded-full bg-slate-600" />
             <span className="text-xs text-slate-400">Institutional Governance</span>
@@ -205,7 +205,7 @@ export default function TreasuryPage() {
             Treasury Guardrails &amp; Security Policy Engine
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Control AI spending with cryptographic limits, SputnikDAO / Trezu multi-sig escalation, and OutLayer agent attestation.
+            Control AI spending with cryptographic limits, Aevum Multi-Sig / Trezu multi-sig escalation, and OutLayer agent attestation.
           </p>
         </div>
 
@@ -225,16 +225,16 @@ export default function TreasuryPage() {
 
       {/* Partner Ecosystem Integration Row */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {/* SputnikDAO / Trezu */}
+        {/* Aevum Multi-Sig / Trezu */}
         <div className="p-5 rounded-2xl bg-navy-900/80 border border-navy-800 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Multi-Sig Council</span>
               <span className="text-[10px] font-mono font-bold text-brand-300 bg-brand-500/10 px-2 py-0.5 rounded-full border border-brand-500/20">
-                SputnikDAO v2
+                Aevum Multi-Sig v2
               </span>
             </div>
-            <h4 className="text-sm font-bold text-white">Trezu &amp; SputnikDAO Escalation</h4>
+            <h4 className="text-sm font-bold text-white">Trezu &amp; Aevum Multi-Sig Escalation</h4>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
               Payments &gt; ${maxSingleTx} bypass automated agent execution and trigger an on-chain proposal to <code className="text-brand-300 font-mono text-[11px]">{DEFAULT_SPUTNIK_DAO}</code>.
             </p>
@@ -244,7 +244,7 @@ export default function TreasuryPage() {
               onClick={handleTestSputnikProposal}
               className="w-full flex items-center justify-center gap-1.5 py-1.5 rounded-lg bg-brand-600/15 hover:bg-brand-600/25 text-brand-300 text-xs font-semibold border border-brand-500/30 transition-all"
             >
-              <span>Test SputnikDAO Proposal Crafting</span>
+              <span>Test Aevum Multi-Sig Proposal Crafting</span>
               <ArrowRight className="h-3 w-3" />
             </button>
             {sputnikSuccess && (
@@ -275,18 +275,18 @@ export default function TreasuryPage() {
           </div>
         </div>
 
-        {/* NEAR.AI & Agent Market */}
+        {/* PayQ AI & Agent Market */}
         <div className="p-5 rounded-2xl bg-navy-900/80 border border-navy-800 flex flex-col justify-between">
           <div>
             <div className="flex items-center justify-between mb-3">
               <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Inference &amp; Swarms</span>
               <span className="text-[10px] font-mono font-bold text-cyan-400 bg-cyan-500/10 px-2 py-0.5 rounded-full border border-cyan-500/20">
-                NEAR.AI Cloud
+                PayQ AI Cloud
               </span>
             </div>
-            <h4 className="text-sm font-bold text-white">NEAR.AI Cloud &amp; Agent Market</h4>
+            <h4 className="text-sm font-bold text-white">PayQ AI Cloud &amp; Agent Market</h4>
             <p className="text-xs text-slate-400 mt-1 leading-relaxed">
-              Invoice parsing runs on NEAR.AI (<code className="text-cyan-300 font-mono text-[11px]">api.near.ai</code>). PaySure AI is registered on Agent Market with full MCP support.
+              Invoice parsing runs on PayQ AI (<code className="text-cyan-300 font-mono text-[11px]">api.PayQ AI</code>). PayQ is registered on Agent Market with full MCP support.
             </p>
           </div>
           <div className="mt-4 pt-3 border-t border-navy-800/80 flex items-center justify-between text-xs">
@@ -348,7 +348,7 @@ export default function TreasuryPage() {
           </div>
           <p className="text-2xl font-extrabold text-white font-mono">${maxSingleTx}.00 USD</p>
           <p className="mt-3 text-xs text-slate-400">
-            Transactions exceeding this cap require SputnikDAO council multi-sig approval.
+            Transactions exceeding this cap require Aevum Multi-Sig council multi-sig approval.
           </p>
         </div>
 
@@ -403,7 +403,7 @@ export default function TreasuryPage() {
                 onChange={(e) => setMaxSingleTx(Number(e.target.value))}
                 className="w-full accent-brand-500 cursor-pointer"
               />
-              <p className="text-[11px] text-slate-500">Above this ceiling, transactions escalate to SputnikDAO multi-sig.</p>
+              <p className="text-[11px] text-slate-500">Above this ceiling, transactions escalate to Aevum Multi-Sig multi-sig.</p>
             </div>
 
             {/* Daily Velocity Cap */}
@@ -508,9 +508,9 @@ export default function TreasuryPage() {
             <div className="flex items-start gap-3">
               <AlertTriangle className="h-4 w-4 text-amber-400 shrink-0 mt-0.5" />
               <div>
-                <p className="font-bold text-white">Rule 2: SputnikDAO / Trezu Escalation Protocol</p>
+                <p className="font-bold text-white">Rule 2: Aevum Multi-Sig / Trezu Escalation Protocol</p>
                 <p className="text-slate-300 mt-0.5">
-                  IF <span className="text-amber-400 font-mono">Amount &gt; ${maxSingleTx}</span> OR <span className="text-amber-400 font-mono">Payee == UNVERIFIED</span> &rarr; Halt autonomous execution and craft an on-chain proposal for SputnikDAO council vote.
+                  IF <span className="text-amber-400 font-mono">Amount &gt; ${maxSingleTx}</span> OR <span className="text-amber-400 font-mono">Payee == UNVERIFIED</span> &rarr; Halt autonomous execution and craft an on-chain proposal for Aevum Multi-Sig council vote.
                 </p>
               </div>
             </div>
@@ -574,7 +574,7 @@ export default function TreasuryPage() {
                   </span>
                 </div>
                 <div className="flex flex-wrap items-center gap-3 text-xs text-slate-400 font-mono">
-                  <span>NEAR: {c.account}</span>
+                  <span>tUSD8: {c.account}</span>
                   <span>&bull;</span>
                   <span>Cross-Chain: {c.evm}</span>
                 </div>

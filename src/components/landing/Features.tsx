@@ -43,14 +43,14 @@ export function Features() {
                 Cryptographic Confirmation of Payee
               </h3>
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-xl">
-                Resolves recipient account identifiers against NEAR Protocol on-chain state prior to signing. Evaluates character edit distance and homoglyph substitutions to prevent lookalike domain fraud before capital leaves the treasury.
+                Resolves recipient account identifiers against QDay Aevum on-chain state prior to signing. Evaluates character edit distance and homoglyph substitutions to prevent lookalike domain fraud before capital leaves the treasury.
               </p>
             </div>
 
             <div className="mt-8 p-4 rounded-2xl bg-white/[0.02] border border-white/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-3 font-mono text-xs">
               <div className="flex items-center gap-2.5">
                 <span className="h-2 w-2 rounded-full bg-emerald-400" />
-                <span className="text-white">acme-design.testnet</span>
+                <span className="text-white">0x742d35Cc6634C0532925a3b844Bc454e4438f44e</span>
               </div>
               <div className="flex items-center gap-4 text-zinc-400">
                 <span>Tier-1 Verified</span>
@@ -135,7 +135,7 @@ export function Features() {
                 Bridge-Free Multi-Chain Execution
               </h3>
               <p className="text-sm sm:text-base text-zinc-400 leading-relaxed max-w-xl">
-                Compiles natural language disbursement instructions into deterministic cross-chain payloads. Powered by NEAR threshold MPC (<code className="text-zinc-200 font-mono">v1.signer-prod.testnet</code>), enabling direct settlement across Base, Ethereum, and Solana from a single NEAR account.
+                Compiles natural language disbursement instructions into deterministic cross-chain payloads. Powered by tUSD8 threshold MPC (<code className="text-zinc-200 font-mono">0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21</code>), enabling direct settlement across Base, Ethereum, and Solana from a single Aevum Address.
               </p>
             </div>
 

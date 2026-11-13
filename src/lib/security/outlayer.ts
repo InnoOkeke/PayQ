@@ -33,7 +33,7 @@ export interface OutlayerAttestation {
 
 export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): OutlayerAttestation {
   const {
-    agentId = "paysure-autonomous-agent.near",
+    agentId = "PayQ-autonomous-agent.tUSD8",
     senderAddress,
     recipientAddress,
     amountUSD,
@@ -55,9 +55,9 @@ export function evaluateOutlayerPolicy(params: OutlayerPolicyCheckParams): Outla
   });
   if (!passedSingleTx) riskScore += 45;
 
-  // 2. Lookalike typosquatting check (e.g. *.testnet or *.near format)
-  const isNamedAccount = recipientAddress.endsWith(".testnet") || recipientAddress.endsWith(".near");
-  const hasDigitSubstitution = /[0-9]/.test(recipientAddress.replace(/\.(testnet|near)/, ""));
+  // 2. Lookalike typosquatting check (e.g. *.testnet or *.tUSD8 format)
+  const isNamedAccount = recipientAddress.endsWith(".testnet") || recipientAddress.endsWith(".tUSD8");
+  const hasDigitSubstitution = /[0-9]/.test(recipientAddress.replace(/\.(testnet|tUSD8)/, ""));
   const passedAntiSpoof = !(hasDigitSubstitution && recipientAddress.includes("satos"));
   rules.push({
     rule: "OUTLAYER_ANTI_SPOOF_VERIFICATION",

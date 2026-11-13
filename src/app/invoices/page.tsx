@@ -19,10 +19,10 @@ import {
 } from "lucide-react";
 import { formatAddress, formatCurrency } from "@/lib/utils";
 import { detectChainFromAddress } from "@/lib/recipients";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { useWallet } from "@/context/WalletContext";
 
 export default function InvoicesPage() {
-  const { isConnected, balance } = useNearWallet();
+  const { isConnected, balance } = useWallet();
   const [invoices, setInvoices] = useState<any[]>([]);
   const [filter, setFilter] = useState("ALL");
   const [search, setSearch] = useState("");
@@ -56,9 +56,9 @@ export default function InvoicesPage() {
 
   const handlePayWithCopilot = (inv: any) => {
     window.dispatchEvent(
-      new CustomEvent("paysure:open-copilot", {
+      new CustomEvent("PayQ:open-copilot", {
         detail: {
-          prompt: `Pay invoice ${inv.invoiceNumber} for ${inv.amount} ${inv.token || "NEAR"} to ${inv.recipientName}`,
+          prompt: `Pay invoice ${inv.invoiceNumber} for ${inv.amount} ${inv.token || "tUSD8"} to ${inv.recipientName}`,
         },
       })
     );
@@ -211,7 +211,7 @@ export default function InvoicesPage() {
                     </span>
                     {isInsufficient && (
                       <span className="text-[10px] text-rose-400 font-medium block mt-0.5">
-                        Exceeds Balance ({balance} NEAR available)
+                        Exceeds Balance ({balance} tUSD8 available)
                       </span>
                     )}
                   </div>

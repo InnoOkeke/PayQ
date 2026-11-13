@@ -52,7 +52,7 @@ export function FloatingCopilot() {
     if (pathname.includes("/pay")) {
       return {
         title: "Multi-Chain Safety Guard",
-        prompt: "Need me to verify a counterparty across Stacks, Bitcoin, EVM, or NEAR before transferring?",
+        prompt: "Need me to verify a counterparty across Stacks, Bitcoin, EVM, or tUSD8 before transferring?",
       };
     }
     if (pathname.includes("/invoices/upload")) {
@@ -104,11 +104,11 @@ export function FloatingCopilot() {
 
   const samplePrompts = [
     "Send $50 to LeProf on Stacks",
-    "Pay LeProf 20 NEAR on Solana",
+    "Pay LeProf 20 tUSD8 on Solana",
     "Send $100 to Satoshi on Bitcoin",
     "Transfer $50 to Acme on Base",
     "Show my pending invoices",
-    "How does Confirmation of Payee work on NEAR?",
+    "How does Confirmation of Payee work on tUSD8?",
   ];
 
   const handleSend = async (textToSend?: string) => {
@@ -172,8 +172,8 @@ export function FloatingCopilot() {
       }
     };
 
-    window.addEventListener("paysure:open-copilot", handleOpenCopilot);
-    return () => window.removeEventListener("paysure:open-copilot", handleOpenCopilot);
+    window.addEventListener("PayQ:open-copilot", handleOpenCopilot);
+    return () => window.removeEventListener("PayQ:open-copilot", handleOpenCopilot);
   }, []);
 
   const handleApplyAndPay = (intent: any) => {
@@ -186,11 +186,11 @@ export function FloatingCopilot() {
     }
 
     const targetAddr =
-      intent.targetChain !== "NEAR Protocol" && intent.resolvedPayee?.targetChainAddress
+      intent.targetChain !== "QDay Aevum" && intent.resolvedPayee?.targetChainAddress
         ? intent.resolvedPayee.targetChainAddress
-        : intent.resolvedPayee?.accountId || "leprof.testnet";
+        : intent.resolvedPayee?.accountId || "0x71C8360f3a8b417c805F99D4133A89f07447d251";
 
-    let chainParam = "near";
+    let chainParam = "tUSD8";
     const tc = (intent.targetChain || "").toLowerCase();
     if (tc.includes("base")) chainParam = "base";
     else if (tc.includes("eth")) chainParam = "ethereum";
@@ -204,7 +204,7 @@ export function FloatingCopilot() {
 
     if (pathname === "/pay") {
       window.dispatchEvent(
-        new CustomEvent("paysure:apply-intent", {
+        new CustomEvent("PayQ:apply-intent", {
           detail: {
             recipient: targetAddr,
             amount: intent.extractedAmount,
@@ -392,7 +392,7 @@ export function FloatingCopilot() {
                           <div className="flex justify-between text-slate-400">
                             <span>Wallet Balance:</span>
                             <span className={m.intent.extractedAmount > parseFloat(balance) ? "text-rose-400 font-bold" : "text-slate-300"}>
-                              {balance} NEAR {m.intent.extractedAmount > parseFloat(balance) ? "(Insufficient)" : ""}
+                              {balance} tUSD8 {m.intent.extractedAmount > parseFloat(balance) ? "(Insufficient)" : ""}
                             </span>
                           </div>
                         )}
@@ -407,7 +407,7 @@ export function FloatingCopilot() {
                         {isConnected && Boolean(balance) && m.intent.extractedAmount > parseFloat(balance) ? (
                           <>
                             <AlertTriangle className="h-3.5 w-3.5 text-amber-400" />
-                            <span>Insufficient Balance ({balance} NEAR)</span>
+                            <span>Insufficient Balance ({balance} tUSD8)</span>
                           </>
                         ) : (
                           <>
@@ -459,7 +459,7 @@ export function FloatingCopilot() {
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask PaySure AI a question..."
+              placeholder="Ask PayQ a question..."
               className="flex-1 bg-navy-900 border border-navy-800 rounded-xl px-3.5 py-2 text-xs text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors"
             />
             <button

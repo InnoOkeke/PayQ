@@ -39,28 +39,28 @@ export default function InvoiceUploadPage() {
     let sampleText = "";
     if (type === "agency") {
       sampleText = `INVOICE #INV-2026-9042
-Issued To: PaySure AI Client
+Issued To: PayQ Client
 From: Acme Web3 Design Studio
-Recipient Wallet Address: acme-design.testnet
+Recipient Wallet Address: 0x742d35Cc6634C0532925a3b844Bc454e4438f44e
 Due Date: 2026-11-20
 Description: UI/UX Brand Design & Frontend Systems
-Amount Due: 75.00 NEAR`;
+Amount Due: 75.00 tUSD8`;
     } else if (type === "dev") {
       sampleText = `INVOICE #INV-2026-8812
 Issued To: Global Fintech Corp
 From: Satoshi Freelance Engineering
-Recipient Wallet Address: satoshi-dev.testnet
+Recipient Wallet Address: 0x1234567890123456789012345678901234567890
 Due Date: 2026-11-25
-Description: NEAR Smart Contract Rust Security Audit
-Amount Due: 120.00 NEAR`;
+Description: tUSD8 Smart Contract Rust Security Audit
+Amount Due: 120.00 tUSD8`;
     } else {
       sampleText = `INVOICE #INV-2026-WARN
-Issued To: PaySure User
+Issued To: PayQ User
 From: Acme Web3 Design Studio
-Recipient Wallet Address: spoofed-acme.testnet
+Recipient Wallet Address: 0x9999999999999999999999999999999999999999
 Due Date: 2026-11-30
 Description: Urgent Rush Security Consultancy
-Amount Due: 320.00 NEAR
+Amount Due: 320.00 tUSD8
 ATTENTION: Notice account address change!`;
     }
 
@@ -183,9 +183,9 @@ ATTENTION: Notice account address change!`;
       const data = await res.json();
       if (res.ok && data.invoice) {
         window.dispatchEvent(
-          new CustomEvent("paysure:open-copilot", {
+          new CustomEvent("PayQ:open-copilot", {
             detail: {
-              prompt: `Pay invoice ${invoiceNumber} for ${amount} NEAR to ${recipientName}`,
+              prompt: `Pay invoice ${invoiceNumber} for ${amount} tUSD8 to ${recipientName}`,
             },
           })
         );
@@ -262,14 +262,14 @@ ATTENTION: Notice account address change!`;
               onClick={() => handleSampleSelect("agency")}
               className="text-xs px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-navy-750 text-brand-300 border border-navy-700 transition-colors"
             >
-              Acme Design Invoice (75 NEAR)
+              Acme Design Invoice (75 tUSD8)
             </button>
             <button
               type="button"
               onClick={() => handleSampleSelect("dev")}
               className="text-xs px-2.5 py-1 rounded-lg bg-navy-800 hover:bg-navy-750 text-brand-300 border border-navy-700 transition-colors"
             >
-              Security Audit Invoice (120 NEAR)
+              Security Audit Invoice (120 tUSD8)
             </button>
             <button
               type="button"
@@ -389,7 +389,7 @@ ATTENTION: Notice account address change!`;
 
               <div className="sm:col-span-2">
                 <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                  Recipient NEAR Account ID
+                  Recipient QDay Aevum Address
                 </label>
                 <input
                   type="text"
@@ -398,14 +398,14 @@ ATTENTION: Notice account address change!`;
                     setRecipientAddress(e.target.value);
                     verifyRecipient(e.target.value, recipientName);
                   }}
-                  placeholder="e.g. acme-design.testnet or satoshi.near"
+                  placeholder="e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e or satoshi.tUSD8"
                   className="w-full bg-navy-950 border border-navy-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500 font-mono"
                 />
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-slate-300 block mb-1.5">
-                  Amount in NEAR
+                  Amount in tUSD8
                 </label>
                 <input
                   type="number"

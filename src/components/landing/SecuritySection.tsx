@@ -20,7 +20,7 @@ export function SecuritySection() {
     },
     {
       title: "02. On-Chain Confirmation of Payee",
-      desc: "Queries the NEAR account registry in real time to authenticate counterparties and quarantine lookalike homoglyph domains prior to signature generation.",
+      desc: "Queries the Aevum Address registry in real time to authenticate counterparties and quarantine lookalike homoglyph domains prior to signature generation.",
       icon: ShieldCheck,
     },
     {
@@ -30,7 +30,7 @@ export function SecuritySection() {
     },
     {
       title: "04. Council Multi-Sig & MPC Signing",
-      desc: "High-value disbursements automatically escalate to SputnikDAO multi-sig governance, while cross-chain settlement executes via threshold MPC without bridge custody.",
+      desc: "High-value disbursements automatically escalate to Aevum Multi-Sig multi-sig governance, while cross-chain settlement executes via threshold MPC without bridge custody.",
       icon: Zap,
     },
   ];
@@ -39,27 +39,27 @@ export function SecuritySection() {
     {
       dimension: "Counterparty Identity",
       legacy: "Unverified raw hexadecimal strings",
-      paysure: "4-tier on-chain Confirmation of Payee",
+      PayQ: "4-tier on-chain Confirmation of Payee",
     },
     {
       dimension: "Lookalike Domain Defense",
       legacy: "Vulnerable to character substitution",
-      paysure: "Automated Levenshtein distance quarantine",
+      PayQ: "Automated Levenshtein distance quarantine",
     },
     {
       dimension: "Agent Liquidity Access",
       legacy: "Unconstrained private key exposure",
-      paysure: "Programmatic velocity caps & killswitch",
+      PayQ: "Programmatic velocity caps & killswitch",
     },
     {
       dimension: "Cross-Chain Settlement",
       legacy: "Custodial bridges & wrapped tokens",
-      paysure: "Native NEAR Chain Signatures (Threshold MPC)",
+      PayQ: "Native PayQRegistry CoP (Threshold MPC)",
     },
     {
       dimension: "Compliance & Audit",
       legacy: "Manual block explorer reconciliation",
-      paysure: "Cryptographic PDF settlement certificates",
+      PayQ: "Cryptographic PDF settlement certificates",
     },
   ];
 
@@ -114,7 +114,7 @@ export function SecuritySection() {
                   Risk Posture Comparison
                 </span>
                 <h3 className="text-base font-semibold text-white mt-0.5">
-                  Legacy Web3 Transfers vs. PaySure Settlement
+                  Legacy Web3 Transfers vs. PayQ Settlement
                 </h3>
               </div>
               <Link
@@ -138,7 +138,7 @@ export function SecuritySection() {
                   </div>
                   <div className="sm:col-span-4 flex items-center gap-2 text-white font-medium">
                     <Check className="h-3.5 w-3.5 text-emerald-400 shrink-0" />
-                    <span>{row.paysure}</span>
+                    <span>{row.PayQ}</span>
                   </div>
                 </div>
               ))}

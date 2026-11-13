@@ -1,5 +1,5 @@
 /**
- * PaySure AI Treasury & Security Guardrails Policy Engine
+ * PayQ Treasury & Security Guardrails Policy Engine
  * 
  * Enforces human-defined constraints on autonomous AI spending:
  * - Single transaction limits ($500.00 USD)
@@ -7,7 +7,7 @@
  * - Department budget allocations
  * - Autonomous auto-approval thresholds for verified counterparties (<= $100.00 USD)
  * - Counterparty trust & reputation scoring (0-100)
- * - SputnikDAO / Trezu Multi-Sig Escalation for high-value transfers
+ * - Aevum Multi-Sig / Trezu Multi-Sig Escalation for high-value transfers
  * - OutLayer Agent Security attestation
  */
 
@@ -86,8 +86,8 @@ export function evaluatePaymentAgainstPolicy(
   verificationStatus: string,
   policy: TreasuryPolicy = DEFAULT_TREASURY_POLICY,
   spentInLast24hUSD: number = 340,
-  recipientAddress: string = "recipient.testnet",
-  senderAddress: string = "user.testnet"
+  recipientAddress: string = "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
+  senderAddress: string = "0x71C8360f3a8b417c805F99D4133A89f07447d251"
 ): PolicyEvaluationResult {
   const violations: string[] = [];
   const warnings: string[] = [];
@@ -101,7 +101,7 @@ export function evaluatePaymentAgainstPolicy(
   const exceedsSingleTx = amountUSD > policy.maxSingleTxAmountUSD;
   if (exceedsSingleTx) {
     violations.push(
-      `Amount ($${amountUSD.toFixed(2)}) exceeds maximum single transaction limit of $${policy.maxSingleTxAmountUSD.toFixed(2)}. Escalating to SputnikDAO council multi-sig.`
+      `Amount ($${amountUSD.toFixed(2)}) exceeds maximum single transaction limit of $${policy.maxSingleTxAmountUSD.toFixed(2)}. Escalating to Aevum Multi-Sig council multi-sig.`
     );
   }
 
@@ -132,20 +132,20 @@ export function evaluatePaymentAgainstPolicy(
     senderAddress,
     recipientAddress,
     amountUSD,
-    token: "NEAR",
+    token: "tUSD8",
     intent: `Transfer ${amountUSD} USD to ${recipientAddress} for ${category}`,
   });
 
   const requiresSputnikDaoEscalation = exceedsSingleTx || outlayerAttestation.recommendation === "REQUIRE_MULTISIG";
 
-  // Build SputnikDAO proposal payload if escalated
+  // Build Aevum Multi-Sig proposal payload if escalated
   let sputnikDaoProposal: ReturnType<typeof buildSputnikTransferProposal> | undefined;
   if (requiresSputnikDaoEscalation) {
     sputnikDaoProposal = buildSputnikTransferProposal({
       daoContract: policy.sputnikDaoContract,
       description: `Payment of $${amountUSD.toFixed(2)} to ${recipientAddress} for ${category}`,
       receiverId: recipientAddress,
-      amountNear: (amountUSD / 5).toFixed(2), // Approximate NEAR value based on ~$5/NEAR
+      amountNear: amountUSD.toFixed(2),
     });
   }
 

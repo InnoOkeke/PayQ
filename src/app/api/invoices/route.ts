@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
       recipientName,
       recipientAddress,
       amount,
-      token = "NEAR",
+      token = "tUSD8",
       dueDate,
       description,
       extractedJson,

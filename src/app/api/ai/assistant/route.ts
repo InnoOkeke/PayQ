@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
-import { nearAi, NEARAI_MODEL, AI_PROVIDER_NAME } from "@/lib/ai/nearAi";
+import { aevumAi, AEVUM_AI_MODEL, AI_PROVIDER_NAME } from "@/lib/ai/aevumAi";
 import { prisma } from "@/lib/prisma";
-import { resolveNaturalLanguageIntent } from "@/lib/near/intentResolver";
+import { resolveNaturalLanguageIntent } from "@/lib/aevum/intentResolver";
 import { detectChainFromAddress } from "@/lib/recipients";
 
 export async function POST(req: NextRequest) {
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
         const intent = {
           rawPrompt: message,
           extractedAmount: targetInvoice.amount,
-          extractedCurrency: targetInvoice.token || "NEAR",
+          extractedCurrency: targetInvoice.token || "tUSD8",
           recipientQuery: targetInvoice.recipientName,
           targetChain: detected.chain,
           memo: `Settlement for Invoice ${targetInvoice.invoiceNumber}`,
@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
             warnings: [],
           },
           settlementExecution: {
-            sourceAccount: "treasury.testnet",
+            sourceAccount: "0x742d35Cc6634C0532925a3b844Bc454e4438f44e",
             settlementRail: detected.rail,
           },
         };
@@ -74,11 +74,11 @@ export async function POST(req: NextRequest) {
         const reply = `**Invoice Prepared for On-Chain Settlement**:\n\n` +
           `• **Invoice Identifier**: \`${targetInvoice.invoiceNumber}\`\n` +
           `• **Beneficiary**: ${targetInvoice.recipientName} (\`${targetInvoice.recipientAddress}\`)\n` +
-          `• **Total Sum**: **${targetInvoice.amount} ${targetInvoice.token || "NEAR"}**\n` +
+          `• **Total Sum**: **${targetInvoice.amount} ${targetInvoice.token || "tUSD8"}**\n` +
           `• **Settlement Network**: ${detected.chain} (${detected.rail})\n` +
           `• **Confirmation of Payee**: Verified On-Chain\n` +
           `• **Treasury Guardrail**: ${policyAllowed ? "✓ Autonomous Limit Approved (< $250)" : "⚠ Requires Officer Multi-Sig"}\n\n` +
-          `Click **Apply & Pay Now** below to sign and complete settlement with your connected NEAR wallet.`;
+          `Click **Apply & Pay Now** below to sign and complete settlement with your connected tUSD8 wallet.`;
 
         return NextResponse.json({ reply, intent, provider: AI_PROVIDER_NAME });
       }
@@ -87,8 +87,8 @@ export async function POST(req: NextRequest) {
     // Check if the user is expressing a conversational payment intent
     const isPaymentIntent = 
       /^(send|pay|transfer|disburse|bridge)\b/i.test(lower) ||
-      /\b(send|pay|transfer|disburse)\s+(\$?\d+|\d+\s*(near|usdc|eth|btc|stx|sol|xrp|atom|xlm)?)/i.test(lower) ||
-      /\b(on\s+(base|ethereum|eth|arbitrum|solana|stacks|bitcoin|btc|ripple|xrp|cosmos|stellar|near))\b/i.test(lower) ||
+      /\b(send|pay|transfer|disburse)\s+(\$?\d+|\d+\s*(tUSD8|usdc|eth|btc|stx|sol|xrp|atom|xlm)?)/i.test(lower) ||
+      /\b(on\s+(base|ethereum|eth|arbitrum|solana|stacks|bitcoin|btc|ripple|xrp|cosmos|stellar|tUSD8))\b/i.test(lower) ||
       lower.includes("send $") ||
       lower.includes("pay $") ||
       lower.includes("transfer $") ||
@@ -105,19 +105,19 @@ export async function POST(req: NextRequest) {
       lower.includes("on eth");
 
     if (isPaymentIntent) {
-      const intent = resolveNaturalLanguageIntent(message, "company.near");
+      const intent = resolveNaturalLanguageIntent(message, "company.tUSD8");
       const policyMsg = intent.policyCheck.autoExecutable
         ? "✓ Autonomous Treasury Approval: Payment is within policy threshold ($250 USD) and daily velocity limits."
         : `⚠ Security Policy Alert: ${intent.policyCheck.violations.join(", ") || "Requires Human Signoff"}`;
 
-      const reply = `**NEAR Cross-Chain Intent Compiled**:\n\n` +
+      const reply = `**tUSD8 Cross-Chain Intent Compiled**:\n\n` +
         `• **Target Chain**: ${intent.targetChain} (${intent.settlementExecution.settlementRail})\n` +
         `• **Settlement Sum**: $${intent.extractedAmount.toFixed(2)} ${intent.extractedCurrency}\n` +
         `• **Payee**: ${intent.resolvedPayee.displayName}\n` +
         `• **Destination Address**: \`${intent.resolvedPayee.targetChainAddress}\`\n` +
         `• **Confirmation of Payee**: ${intent.resolvedPayee.verificationStatus} (Trust Score: ${intent.resolvedPayee.reputationScore}/100)\n` +
         `• **Treasury Guardrail**: ${policyMsg}\n\n` +
-        `Click **Apply & Pay Now** below to authorize this payment directly from your NEAR wallet.`;
+        `Click **Apply & Pay Now** below to authorize this payment directly from your tUSD8 wallet.`;
 
       return NextResponse.json({ reply, intent, provider: AI_PROVIDER_NAME });
     }
@@ -129,17 +129,17 @@ export async function POST(req: NextRequest) {
       prisma.recipient.findMany({ take: 5 }),
     ]);
 
-    const systemPrompt = `You are PaySure AI Copilot, a senior Web3 fintech assistant running on NEAR.AI Cloud and NEAR Protocol.
+    const systemPrompt = `You are PayQ Copilot, a senior Web3 fintech assistant running on PayQ AI Cloud and QDay Aevum.
 Platform Details:
-- Blockchain: NEAR Protocol (NEAR Testnet, RPC: https://rpc.testnet.near.org)
-- AI Inference Engine: NEAR.AI Cloud (api.near.ai)
-- Settlement Tokens: NEAR (native token, 24 decimals) and USDC (NEP-141 token, 6 decimals)
-- Explorer: https://testnet.nearblocks.io
-- Wallet & Faucet: https://testnet.mynearwallet.com
-- Identity Feature: Confirmation of Payee for human-readable named accounts (*.testnet, *.near) to prevent address spoofing and typos.
-- Multi-Chain Abstraction: 8 supported destination chains including NEAR, Base, Ethereum, Arbitrum, Bitcoin (Native), Solana, Ripple (XRP), Cosmos Hub, Stacks (Bitcoin L2), and Stellar.
-- Settlement Rails: Model A (Intent-driven Solver bridge for external wallets) and Model B (NEAR decentralized Threshold MPC Chain Signatures v1.signer-prod.testnet).
-- Governance: SputnikDAO & Trezu multi-sig escalation for transactions exceeding autonomous limits ($500).
+- Blockchain: QDay Aevum (QDay Aevum Testnet, RPC: https://rpc-test.qday.info)
+- AI Inference Engine: PayQ AI Cloud (api.PayQ AI)
+- Settlement Tokens: tUSD8 (native token, 24 decimals) and USDC (NEP-141 token, 6 decimals)
+- Explorer: https://testnet.Aevum Explorer.io
+- Wallet & Faucet: https://testnet.MetaMask / EVM Wallet.com
+- Identity Feature: Confirmation of Payee for human-readable named accounts (*.testnet, *.tUSD8) to prevent address spoofing and typos.
+- Multi-Chain Abstraction: 8 supported destination chains including tUSD8, Base, Ethereum, Arbitrum, Bitcoin (Native), Solana, Ripple (XRP), Cosmos Hub, Stacks (Bitcoin L2), and Stellar.
+- Settlement Rails: Model A (Intent-driven Solver bridge for external wallets) and Model B (tUSD8 decentralized Threshold MPC Chain Signatures 0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21).
+- Governance: Aevum Multi-Sig & Trezu multi-sig escalation for transactions exceeding autonomous limits ($500).
 - Agent Security: OutLayer policy rules and emergency circuit breaker.
 
 Real Database Context:
@@ -170,7 +170,7 @@ Instructions:
 1. Provide concise, professional, fintech-grade answers.
 2. If asked about pending invoices, payments, or recipients, use the real database context above.
 3. If asked about verification statuses, explain:
-   - VERIFIED: NEAR account matches registered payee identity on-chain.
+   - VERIFIED: Aevum Address matches registered payee identity on-chain.
    - WARNING: Recipient exists but info needs manual confirmation.
    - UNVERIFIED: Account is not in the registry; verify with extreme caution.
    - MISMATCH: Account on invoice differs from registered payee account; high fraud risk!
@@ -178,9 +178,8 @@ Instructions:
 5. NEVER request private keys or seed phrases.`;
 
     const hasApiKey = Boolean(
-      process.env.NEARAI_API_KEY ||
-      process.env.NEAR_AI_API_KEY ||
-      (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== "dummy_key")
+      (process.env.DEEPSEEK_API_KEY && process.env.DEEPSEEK_API_KEY !== "dummy_key") ||
+      process.env.OPENAI_API_KEY
     );
 
     if (!hasApiKey) {
@@ -219,8 +218,8 @@ Instructions:
       });
     }
 
-    const completion = await nearAi.chat.completions.create({
-      model: NEARAI_MODEL,
+    const completion = await aevumAi.chat.completions.create({
+      model: AEVUM_AI_MODEL,
       messages: [
         { role: "system", content: systemPrompt },
         { role: "user", content: message },
@@ -237,7 +236,7 @@ Instructions:
   } catch (error: any) {
     console.error("AI assistant error:", error);
     return NextResponse.json({
-      reply: "PaySure AI Copilot is online. Ask about pending invoices, Confirmation of Payee, or multi-chain intents.",
+      reply: "PayQ AI Copilot is online on QDay Aevum Testnet. Ask about pending invoices, Confirmation of Payee, or tUSD8 payments.",
       provider: AI_PROVIDER_NAME,
     });
   }

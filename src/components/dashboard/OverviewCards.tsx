@@ -21,7 +21,7 @@ export function OverviewCards({
   const cards = [
     {
       title: "Total Amount Sent",
-      value: `${formatCurrency(totalVolume)} NEAR`,
+      value: `${formatCurrency(totalVolume)} tUSD8`,
       sub: `${totalPaymentsCount} transactions settled`,
       icon: Send,
       color: "text-brand-400",
@@ -30,7 +30,7 @@ export function OverviewCards({
     {
       title: "Pending Invoices",
       value: `${pendingInvoicesCount}`,
-      sub: `${formatCurrency(pendingVolume)} NEAR awaiting payment`,
+      sub: `${formatCurrency(pendingVolume)} tUSD8 awaiting payment`,
       icon: FileText,
       color: "text-amber-400",
       bg: "bg-amber-500/10",
@@ -46,7 +46,7 @@ export function OverviewCards({
     {
       title: "Settlement Speed",
       value: "~1.1s",
-      sub: "Sub-second finality on NEAR",
+      sub: "Sub-second finality on tUSD8",
       icon: TrendingUp,
       color: "text-brand-accent",
       bg: "bg-cyan-500/10",

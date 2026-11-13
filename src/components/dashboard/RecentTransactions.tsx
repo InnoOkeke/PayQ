@@ -25,7 +25,7 @@ export function RecentTransactions({ payments = [] }: { payments?: PaymentItem[]
               <History className="h-4 w-4 text-brand-400 shrink-0" />
               <span>Recent Transactions</span>
             </h3>
-            <p className="text-xs text-slate-400 mt-0.5">On-chain payments executed on NEAR Protocol</p>
+            <p className="text-xs text-slate-400 mt-0.5">On-chain payments executed on QDay Aevum</p>
           </div>
           <Link
             href="/history"
@@ -41,7 +41,7 @@ export function RecentTransactions({ payments = [] }: { payments?: PaymentItem[]
             <History className="h-7 w-7 text-slate-500 mx-auto mb-2.5" />
             <p className="text-sm text-slate-200 font-medium">No transactions recorded yet</p>
             <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-              Confirmed NEAR &amp; USDC payments will appear here with live explorer receipts.
+              Confirmed tUSD8 &amp; USDC payments will appear here with live explorer receipts.
             </p>
           </div>
         ) : (
@@ -73,7 +73,7 @@ export function RecentTransactions({ payments = [] }: { payments?: PaymentItem[]
                 <div className="flex items-center justify-between sm:justify-end gap-4 shrink-0">
                   <div className="text-right">
                     <span className="text-sm font-bold text-white block whitespace-nowrap">
-                      {formatCurrency(tx.amount)} NEAR
+                      {formatCurrency(tx.amount)} tUSD8
                     </span>
                     <span className="inline-block text-[10px] uppercase font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
                       {tx.status}
@@ -81,11 +81,11 @@ export function RecentTransactions({ payments = [] }: { payments?: PaymentItem[]
                   </div>
 
                   <a
-                    href={`https://testnet.nearblocks.io/txns/${tx.transactionHash}`}
+                    href={`https://testnet.Aevum Explorer.io/txns/${tx.transactionHash}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-lg bg-white/[0.05] hover:bg-white/[0.1] text-slate-300 hover:text-white transition-colors"
-                    title="View on NEARBlocks"
+                    title="View on Aevum Explorer"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>

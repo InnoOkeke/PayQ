@@ -4,7 +4,7 @@ export const dynamic = "force-dynamic";
 
 /**
  * Model Context Protocol (MCP) Server Definition
- * Allows Claude Desktop, Cursor, and Agent Market swarms to connect to PaySure AI.
+ * Allows Claude Desktop, Cursor, and Agent Market swarms to connect to PayQ.
  * Spec: https://modelcontextprotocol.io/
  */
 
@@ -12,8 +12,8 @@ export async function GET() {
   return NextResponse.json({
     mcpVersion: "1.0.0",
     serverInfo: {
-      name: "paysure-ai-mcp",
-      title: "PaySure AI — Autonomous Invoicing & Confirmation of Payee",
+      name: "PayQ-ai-mcp",
+      title: "PayQ — Autonomous Invoicing & Confirmation of Payee",
       version: "1.0.0",
     },
     capabilities: {
@@ -26,13 +26,13 @@ export async function GET() {
       {
         name: "verify_near_payee",
         description:
-          "Checks whether a recipient NEAR account exists on-chain and verifies identity against the Confirmation of Payee registry.",
+          "Checks whether a recipient Aevum Address exists on-chain and verifies identity against the Confirmation of Payee registry.",
         inputSchema: {
           type: "object",
           properties: {
             accountId: {
               type: "string",
-              description: "The NEAR account (e.g. acme-design.testnet or satoshi.near)",
+              description: "The Aevum Address (e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e or satoshi.tUSD8)",
             },
           },
           required: ["accountId"],
@@ -55,7 +55,7 @@ export async function GET() {
       {
         name: "sputnik_dao_proposal",
         description:
-          "Constructs a SputnikDAO / Trezu council transfer proposal when a payment exceeds autonomous limits.",
+          "Constructs a Aevum Multi-Sig / Trezu council transfer proposal when a payment exceeds autonomous limits.",
         inputSchema: {
           type: "object",
           properties: {

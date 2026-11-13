@@ -14,10 +14,10 @@ import {
   CheckCircle2
 } from "lucide-react";
 import { detectChainFromAddress } from "@/lib/recipients";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { useWallet } from "@/context/WalletContext";
 
 const SUPPORTED_CHAINS = [
-  { id: "near", name: "NEAR Protocol", rail: "Native", badge: "NEAR" },
+  { id: "tUSD8", name: "QDay Aevum", rail: "Native", badge: "tUSD8" },
   { id: "base", name: "Base", rail: "Model A / MPC", badge: "BASE" },
   { id: "ethereum", name: "Ethereum", rail: "Model B / MPC", badge: "ETH" },
   { id: "arbitrum", name: "Arbitrum", rail: "Model A / MPC", badge: "ARB" },
@@ -31,16 +31,16 @@ const SUPPORTED_CHAINS = [
 
 export default function NewInvoicePage() {
   const router = useRouter();
-  const { isConnected, balance } = useNearWallet();
+  const { isConnected, balance } = useWallet();
 
   const [invoiceNumber, setInvoiceNumber] = useState(
     "INV-" + Math.floor(1000 + Math.random() * 9000)
   );
   const [recipientName, setRecipientName] = useState("");
   const [recipientAddress, setRecipientAddress] = useState("");
-  const [selectedChainId, setSelectedChainId] = useState("near");
+  const [selectedChainId, setSelectedChainId] = useState("tUSD8");
   const [amount, setAmount] = useState("");
-  const [token, setToken] = useState("NEAR");
+  const [token, setToken] = useState("tUSD8");
   const [dueDate, setDueDate] = useState(
     new Date(Date.now() + 14 * 86400000).toISOString().split("T")[0]
   );
@@ -98,7 +98,7 @@ export default function NewInvoicePage() {
     }
 
     if (proceedToPay && isInsufficientBalance) {
-      alert(`Insufficient funds. Your available balance is ${balance} NEAR.`);
+      alert(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
       return;
     }
 
@@ -145,7 +145,7 @@ export default function NewInvoicePage() {
             Create Multi-Chain Invoice
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Generate verifiable invoices payable across NEAR, Base, Stacks, Bitcoin, Solana, and more.
+            Generate verifiable invoices payable across tUSD8, Base, Stacks, Bitcoin, Solana, and more.
           </p>
         </div>
 
@@ -225,7 +225,7 @@ export default function NewInvoicePage() {
           <div className="sm:col-span-2 space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-slate-300 block">
-                Recipient Wallet Address / Account ({SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.name || "NEAR"})
+                Recipient Wallet Address / Account ({SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.name || "tUSD8"})
               </label>
               <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
                 <Globe className="h-3 w-3" />
@@ -240,8 +240,8 @@ export default function NewInvoicePage() {
                 value={recipientAddress}
                 onChange={(e) => handleAddressChange(e.target.value)}
                 placeholder={
-                  selectedChainId === "near"
-                    ? "e.g. acme-design.testnet or satoshi.near"
+                  selectedChainId === "tUSD8"
+                    ? "e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e or satoshi.tUSD8"
                     : selectedChainId === "base" || selectedChainId === "ethereum"
                     ? "e.g. 0x71C8360f... on Base/Ethereum"
                     : selectedChainId === "bitcoin"
@@ -295,7 +295,7 @@ export default function NewInvoicePage() {
                 <span className="text-[11px] text-slate-400">
                   Wallet Balance:{" "}
                   <strong className={isInsufficientBalance ? "text-rose-400 font-bold" : "text-brand-300"}>
-                    {balance} NEAR
+                    {balance} tUSD8
                   </strong>
                 </span>
               )}
@@ -316,7 +316,7 @@ export default function NewInvoicePage() {
             {isInsufficientBalance && (
               <div className="flex items-center gap-1.5 text-rose-400 text-[11px] mt-1 font-medium">
                 <AlertTriangle className="h-3 w-3 shrink-0" />
-                <span>Amount exceeds available balance ({balance} NEAR).</span>
+                <span>Amount exceeds available balance ({balance} tUSD8).</span>
               </div>
             )}
           </div>
@@ -330,7 +330,7 @@ export default function NewInvoicePage() {
               onChange={(e) => setToken(e.target.value)}
               className="w-full bg-navy-950 border border-navy-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
             >
-              <option value="NEAR">NEAR (Native)</option>
+              <option value="tUSD8">tUSD8 (Native)</option>
               <option value="USDC">USDC (NEP-141)</option>
             </select>
           </div>

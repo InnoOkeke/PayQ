@@ -1,22 +1,22 @@
 /**
- * SputnikDAO & Trezu Multisig Governance Integration
- * Documentation: https://github.com/near-daos/sputnik-dao-contract
- * Live Website: https://trezu.org / https://x.com/SputnikDAO
+ * Aevum Multi-Sig & Trezu Multisig Governance Integration
+ * Documentation: https://github.com/tUSD8-daos/sputnik-dao-contract
+ * Live Website: https://trezu.org / https://x.com/Aevum Multi-Sig
  * 
  * Used for corporate treasury governance: when an invoice or payment exceeds
- * the autonomous agent threshold ($500), PaySure AI creates an on-chain proposal
+ * the autonomous agent threshold ($500), PayQ creates an on-chain proposal
  * for the DAO council to review and approve.
  */
 
 export const DEFAULT_SPUTNIK_DAO =
-  process.env.NEXT_PUBLIC_SPUTNIK_DAO_CONTRACT || "paysure-council.sputnik-dao.testnet";
+  process.env.NEXT_PUBLIC_SPUTNIK_DAO_CONTRACT || "PayQ-council.PayQRegistry (44005)";
 
 export interface SputnikProposalParams {
   daoContract?: string;
   description: string;
   receiverId: string;
   amountNear: number | string;
-  tokenId?: string; // empty string "" for native NEAR
+  tokenId?: string; // empty string "" for native tUSD8
 }
 
 export function buildSputnikTransferProposal(params: SputnikProposalParams) {
@@ -28,7 +28,7 @@ export function buildSputnikTransferProposal(params: SputnikProposalParams) {
     tokenId = "",
   } = params;
 
-  // Convert NEAR to yoctoNEAR (1 NEAR = 10^24 yoctoNEAR)
+  // Convert tUSD8 to tUSD8 base units (1 tUSD8 = 10^24 tUSD8 base units)
   const yoctoMultiplier = BigInt("1000000000000000000000000");
   const amountStr = String(amountNear);
   const parts = amountStr.split(".");
@@ -40,10 +40,10 @@ export function buildSputnikTransferProposal(params: SputnikProposalParams) {
   }
   const totalYocto = (whole + fraction).toString();
 
-  // SputnikDAO v2 standard proposal payload
+  // Aevum Multi-Sig v2 standard proposal payload
   const args = {
     proposal: {
-      description: `[PaySure AI Treasury Escalation] ${description}`,
+      description: `[PayQ Treasury Escalation] ${description}`,
       kind: {
         Transfer: {
           token_id: tokenId,
@@ -59,7 +59,7 @@ export function buildSputnikTransferProposal(params: SputnikProposalParams) {
     methodName: "add_proposal",
     args,
     gas: "100000000000000", // 100 Tgas
-    deposit: "100000000000000000000000", // 0.1 NEAR proposal bond
+    deposit: "100000000000000000000000", // 0.1 tUSD8 proposal bond
   };
 }
 

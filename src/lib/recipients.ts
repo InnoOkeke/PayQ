@@ -4,7 +4,7 @@ export interface CounterpartyRecord {
   id: string;
   displayName: string;
   paymentId: string;
-  walletAddress: string; // Primary NEAR identifier
+  walletAddress: string; // Primary tUSD8 identifier
   evmAddress?: string; // Base / Ethereum / Arbitrum
   bitcoinAddress?: string; // Bitcoin native (SegWit / Taproot)
   solanaAddress?: string; // Solana
@@ -19,7 +19,7 @@ export interface CounterpartyRecord {
 
 // Global in-memory & file-compatible store for server lifetime
 declare global {
-  var __paysure_recipients: CounterpartyRecord[] | undefined;
+  var __PayQ_recipients: CounterpartyRecord[] | undefined;
 }
 
 const DEFAULT_RECIPIENTS: CounterpartyRecord[] = [
@@ -84,10 +84,10 @@ const DEFAULT_RECIPIENTS: CounterpartyRecord[] = [
 ];
 
 function getStore(): CounterpartyRecord[] {
-  if (!globalThis.__paysure_recipients) {
-    globalThis.__paysure_recipients = [...DEFAULT_RECIPIENTS];
+  if (!globalThis.__PayQ_recipients) {
+    globalThis.__PayQ_recipients = [...DEFAULT_RECIPIENTS];
   }
-  return globalThis.__paysure_recipients;
+  return globalThis.__PayQ_recipients;
 }
 
 export function detectChainFromAddress(addr: string): {
@@ -110,7 +110,7 @@ export function detectChainFromAddress(addr: string): {
   if (/^(bc1|[13]|tb1)[a-zA-HJ-NP-Z0-9]{25,62}$/.test(clean)) {
     return {
       chain: "Bitcoin",
-      rail: "NEAR Chain Signatures (MPC)",
+      rail: "PayQRegistry CoP (MPC)",
       currency: "BTC",
     };
   }
@@ -119,7 +119,7 @@ export function detectChainFromAddress(addr: string): {
   if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(clean) && !clean.includes(".")) {
     return {
       chain: "Solana",
-      rail: "NEAR Intent Solver (Model A)",
+      rail: "tUSD8 Intent Solver (Model A)",
       currency: "SOL / USDC",
     };
   }
@@ -128,7 +128,7 @@ export function detectChainFromAddress(addr: string): {
   if (/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(clean)) {
     return {
       chain: "Ripple (XRP)",
-      rail: "NEAR Intent Solver (Model A)",
+      rail: "tUSD8 Intent Solver (Model A)",
       currency: "XRP",
     };
   }
@@ -137,7 +137,7 @@ export function detectChainFromAddress(addr: string): {
   if (/^cosmos1[a-z0-9]{38,45}$/.test(clean)) {
     return {
       chain: "Cosmos",
-      rail: "NEAR Intent Solver (Model A)",
+      rail: "tUSD8 Intent Solver (Model A)",
       currency: "ATOM",
     };
   }
@@ -146,7 +146,7 @@ export function detectChainFromAddress(addr: string): {
   if (/^S[PT][a-zA-Z0-9]{28,42}$/.test(clean)) {
     return {
       chain: "Stacks (Bitcoin L2)",
-      rail: "NEAR Intent Solver (Model A)",
+      rail: "tUSD8 Intent Solver (Model A)",
       currency: "STX",
     };
   }
@@ -155,16 +155,16 @@ export function detectChainFromAddress(addr: string): {
   if (/^G[A-Z2-7]{55}$/.test(clean)) {
     return {
       chain: "Stellar",
-      rail: "NEAR Intent Solver (Model A)",
+      rail: "tUSD8 Intent Solver (Model A)",
       currency: "XLM",
     };
   }
 
-  // NEAR Protocol
+  // QDay Aevum
   return {
-    chain: "NEAR Protocol",
-    rail: "NEAR Native",
-    currency: "NEAR",
+    chain: "QDay Aevum",
+    rail: "QDay Aevum",
+    currency: "tUSD8",
   };
 }
 
@@ -242,7 +242,7 @@ export async function addCounterparty(data: {
     stacksAddress: data.stacksAddress ? data.stacksAddress.trim() : undefined,
     stellarAddress: data.stellarAddress ? data.stellarAddress.trim() : undefined,
     verificationStatus: data.verificationStatus || "VERIFIED",
-    notes: data.notes || "Attested corporate counterparty in PaySure Directory.",
+    notes: data.notes || "Attested corporate counterparty in PayQ Directory.",
     createdAt: new Date().toISOString(),
   };
 
@@ -306,7 +306,7 @@ export async function findCounterparty(cleanAddress: string, paymentId?: string)
   const normalizedAddr = cleanAddress.trim();
   const lowerAddr = normalizedAddr.toLowerCase();
 
-  // 1. Direct NEAR address match
+  // 1. Direct tUSD8 address match
   let match = all.find((r) => r.walletAddress.toLowerCase() === lowerAddr);
   if (match) return match;
 
@@ -342,7 +342,7 @@ export async function findCounterparty(cleanAddress: string, paymentId?: string)
   match = all.find((r) => r.stellarAddress && r.stellarAddress === normalizedAddr);
   if (match) return match;
 
-  // 9. Handle common NEAR typo like .tesnet -> .testnet
+  // 9. Handle common tUSD8 typo like .tesnet -> .testnet
   if (lowerAddr.endsWith(".tesnet")) {
     const fixed = lowerAddr.replace(/\.tesnet$/, ".testnet");
     match = all.find((r) => r.walletAddress.toLowerCase() === fixed);

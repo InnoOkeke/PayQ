@@ -107,7 +107,7 @@ export function BlockchainSection() {
                 Universal Non-Custodial Wallet Compatibility
               </h3>
               <p className="text-xs text-zinc-400 mt-0.5">
-                Integrated with the official NEAR Wallet Selector standard for hardware and software signing.
+                Integrated with the official tUSD8 Wallet Selector standard for hardware and software signing.
               </p>
             </div>
             <span className="text-[11px] font-mono text-zinc-500 whitespace-nowrap">

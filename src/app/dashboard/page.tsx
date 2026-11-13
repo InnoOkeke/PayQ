@@ -11,10 +11,10 @@ import { OverviewCards } from "@/components/dashboard/OverviewCards";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { OutstandingInvoices } from "@/components/dashboard/OutstandingInvoices";
 import { RecentTransactions } from "@/components/dashboard/RecentTransactions";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { useWallet } from "@/context/WalletContext";
 
 export default function DashboardPage() {
-  const { accountId, isConnected, balance, connect, isConnecting } = useNearWallet();
+  const { accountId, isConnected, balance, connect, isConnecting } = useWallet();
   const [stats, setStats] = useState({
     totalPaymentsCount: 0,
     totalVolume: 0,
@@ -63,11 +63,11 @@ export default function DashboardPage() {
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
             {isConnected ? (
               <span>
-                Connected as <strong className="text-brand-300 font-mono">{accountId}</strong> (Balance: {balance} NEAR). Real testnet transactions and verification.
+                Connected as <strong className="text-brand-300 font-mono">{accountId}</strong> (Balance: {balance} tUSD8). Real testnet transactions and verification.
               </span>
             ) : (
               <span>
-                Connect your NEAR wallet to manage payments, verify counterparties with Confirmation of Payee, and track live audit trails.
+                Connect your tUSD8 wallet to manage payments, verify counterparties with Confirmation of Payee, and track live audit trails.
               </span>
             )}
           </p>
@@ -81,7 +81,7 @@ export default function DashboardPage() {
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-lg shadow-brand-600/20 transition-all whitespace-nowrap"
             >
               <Wallet className="h-4 w-4" />
-              <span>{isConnecting ? "Connecting..." : "Connect NEAR Wallet"}</span>
+              <span>{isConnecting ? "Connecting..." : "Connect tUSD8 Wallet"}</span>
             </button>
           ) : (
             <div className="flex items-center gap-2.5">

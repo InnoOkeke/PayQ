@@ -1,11 +1,12 @@
 import { NextResponse } from "next/server";
-import { resolveNaturalLanguageIntent } from "@/lib/near/intentResolver";
+import { resolveNaturalLanguageIntent } from "@/lib/aevum/intentResolver";
 
 export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
-    const { prompt, senderAccount = "company.near" } = await req.json();
+    const { prompt, senderAccount = "0x0000000000000000000000000000000000000000" } =
+      await req.json();
 
     if (!prompt || typeof prompt !== "string") {
       return NextResponse.json({ error: "prompt is required" }, { status: 400 });
@@ -22,4 +23,3 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
-
