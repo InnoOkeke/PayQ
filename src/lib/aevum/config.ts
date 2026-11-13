@@ -42,6 +42,9 @@ export const AEVUM_CONFIG = {
   nativeDecimals: 18,
   payqRegistryAddress: (process.env.NEXT_PUBLIC_PAYQ_REGISTRY_ADDRESS ||
     "0xD64086b23C7d4499C0FD7524a47E404994097BA0") as `0x${string}` | "",
+  erc8004RegistryAddress: (process.env.NEXT_PUBLIC_ERC8004_REGISTRY_ADDRESS ||
+    "0x8BaB5415A1b8949F659F632012c8f222978d11d0") as `0x${string}`,
+  erc8004AgentId: 1,
 };
 
 export const ERC20_ABI = parseAbi([
@@ -67,6 +70,16 @@ export const PAYQ_REGISTRY_ABI = parseAbi([
   "function paused() view returns (bool)",
   "function owner() view returns (address)",
   "function windowSpent(address account) view returns (uint256)",
+]);
+
+export const ERC8004_REGISTRY_ABI = parseAbi([
+  "function register(string agentURI) returns (uint256 agentId)",
+  "function ownerOf(uint256 agentId) view returns (address)",
+  "function tokenURI(uint256 agentId) view returns (string)",
+  "function getAgentWallet(uint256 agentId) view returns (address)",
+  "function totalAgents() view returns (uint256)",
+  "function giveFeedback(uint256 agentId, int128 value, uint8 valueDecimals, string tag1, string tag2, string feedbackURI, bytes32 feedbackHash)",
+  "function getSummary(uint256 agentId) view returns (uint64 count, int128 averageValue, uint8 decimals)",
 ]);
 
 export function isValidAevumAddress(addr: string): addr is `0x${string}` {

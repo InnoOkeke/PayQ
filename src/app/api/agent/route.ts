@@ -2,24 +2,45 @@ import { NextRequest, NextResponse } from "next/server";
 import { evaluateOutlayerPolicy } from "@/lib/security/outlayer";
 import { buildSputnikTransferProposal } from "@/lib/treasury/sputnikDao";
 import { resolveNaturalLanguageIntent } from "@/lib/aevum/intentResolver";
+import { AEVUM_CONFIG } from "@/lib/aevum/config";
 
 export const dynamic = "force-dynamic";
 
 /**
- * PayQ Agent Endpoint
+ * PayQ Agent Endpoint (ERC-8004 Registration v1)
  *
- * Allows AI agents and MCP clients to verify QDay Aevum counterparties,
- * resolve natural-language tUSD8 payment intents, and check PayQRegistry guardrails.
+ * Serves the ERC-8004 Trustless Agent registration JSON and executes
+ * agent tool calls for Confirmation of Payee & QDay Aevum tUSD8 settlement.
  */
 export async function GET() {
   return NextResponse.json({
+    type: "https://eips.ethereum.org/EIPS/eip-8004#registration-v1",
     name: "PayQ — Autonomous Invoicing & Confirmation of Payee Agent",
     slug: "payq-ai",
     version: "1.0.0",
+    active: true,
     protocol: "QDay Aevum (Chain ID 44005)",
     description:
       "Autonomous corporate invoicing, on-chain Confirmation of Payee verification, and multi-wallet Treasury Guardrails via PayQRegistry.sol.",
     author: "PayQ Team",
+    registrations: [
+      {
+        agentId: AEVUM_CONFIG.erc8004AgentId,
+        agentRegistry: `eip155:${AEVUM_CONFIG.chainId}:${AEVUM_CONFIG.erc8004RegistryAddress}`,
+      },
+    ],
+    supportedTrust: ["reputation"],
+    services: [
+      {
+        name: "MCP",
+        endpoint: "https://payq-virid.vercel.app/api/agent/mcp",
+        version: "1.0.0",
+      },
+      {
+        name: "web",
+        endpoint: "https://payq-virid.vercel.app",
+      },
+    ],
     pricing: {
       model: "FREE_TIER_WITH_GAS",
       settlementToken: "tUSD8",
@@ -28,6 +49,7 @@ export async function GET() {
       aevumTestnet: true,
       tusd8: true,
       payqRegistry: true,
+      erc8004: true,
     },
     tools: [
       {

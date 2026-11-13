@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { PayQLogo } from "@/components/brand/Logos";
 import { useWallet } from "@/context/WalletContext";
-import { explorerTxUrl } from "@/lib/aevum/config";
+import { AEVUM_CONFIG, explorerAddressUrl, explorerTxUrl } from "@/lib/aevum/config";
 
 interface Message {
   role: "user" | "assistant";
@@ -348,9 +348,15 @@ export function FloatingCopilot() {
               <div>
                 <div className="flex items-center gap-1.5">
                   <h3 className="text-xs font-bold text-white">PayQ AI Copilot</h3>
-                  <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
-                    Agent
-                  </span>
+                  <a
+                    href={explorerAddressUrl(AEVUM_CONFIG.erc8004RegistryAddress)}
+                    target="_blank"
+                    rel="noreferrer"
+                    title="Verified ERC-8004 Agent #1 on QDay Aevum"
+                    className="text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 hover:bg-emerald-500/25 transition-colors"
+                  >
+                    ERC-8004 #{AEVUM_CONFIG.erc8004AgentId}
+                  </a>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
                   <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
