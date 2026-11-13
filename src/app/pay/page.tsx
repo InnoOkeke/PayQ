@@ -914,8 +914,8 @@ export default function PayPage() {
                     onChange={(e) => setTokenSymbol(e.target.value)}
                     className="w-full bg-[#0D111A] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-brand-500 transition-colors"
                   >
-                    <option value="tUSD8">tUSD8 (Native)</option>
-                    <option value="USDC">USDC (NEP-141)</option>
+                    <option value="tUSD8">tUSD8 (Stablecoin)</option>
+                    <option value="tQDAY">tQDAY (Native Gas)</option>
                   </select>
                 </div>
               </div>
@@ -972,11 +972,11 @@ export default function PayPage() {
               <div className="space-y-2 font-mono text-[11px]">
                 <div className="flex justify-between py-1.5 border-b border-white/[0.05] text-slate-400">
                   <span>Single-Tx Policy Limit</span>
-                  <span className="text-white">200.00 tUSD8 ($500)</span>
+                  <span className="text-white">500.00 tUSD8 (PayQRegistry)</span>
                 </div>
                 <div className="flex justify-between py-1.5 border-b border-white/[0.05] text-slate-400">
-                  <span>Consensus Finality</span>
-                  <span className="text-emerald-400">~1.1s (Nightshade 2.0)</span>
+                  <span>Network</span>
+                  <span className="text-emerald-400">QDay Aevum (44005)</span>
                 </div>
                 <div className="flex justify-between py-1.5 text-slate-400">
                   <span>Custody Model</span>

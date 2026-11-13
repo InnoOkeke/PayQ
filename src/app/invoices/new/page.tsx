@@ -309,8 +309,8 @@ export default function NewInvoicePage() {
               onChange={(e) => setToken(e.target.value)}
               className="w-full bg-navy-950 border border-navy-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500"
             >
-              <option value="tUSD8">tUSD8 (Native)</option>
-              <option value="USDC">USDC (NEP-141)</option>
+              <option value="tUSD8">tUSD8 (Stablecoin)</option>
+              <option value="tQDAY">tQDAY (Native)</option>
             </select>
           </div>
 

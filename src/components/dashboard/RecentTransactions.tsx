@@ -41,7 +41,7 @@ export function RecentTransactions({ payments = [] }: { payments?: PaymentItem[]
             <History className="h-7 w-7 text-slate-500 mx-auto mb-2.5" />
             <p className="text-sm text-slate-200 font-medium">No transactions recorded yet</p>
             <p className="text-xs text-slate-400 mt-1 max-w-xs mx-auto">
-              Confirmed tUSD8 &amp; USDC payments will appear here with live explorer receipts.
+              Confirmed tUSD8 &amp; tQDAY payments will appear here with live explorer receipts.
             </p>
           </div>
         ) : (
