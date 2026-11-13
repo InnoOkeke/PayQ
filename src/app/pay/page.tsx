@@ -26,9 +26,7 @@ import { detectChainFromAddress } from "@/lib/recipients";
 import { formatCurrency } from "@/lib/utils";
 
 const SUPPORTED_CHAINS = [
-  { id: "aevum", name: "QDay Aevum Testnet", rail: "QDay Aevum (tUSD8 / ERC-20)", badge: "AEVUM", color: "text-emerald-400" },
-  { id: "base", name: "Base", rail: "EVM Bridge", badge: "BASE", color: "text-blue-400" },
-  { id: "ethereum", name: "Ethereum", rail: "EVM Bridge", badge: "ETH", color: "text-indigo-400" },
+  { id: "aevum", name: "QDay Aevum Testnet", rail: "PayQRegistry (tUSD8)", badge: "AEVUM", color: "text-emerald-400" },
 ];
 
 export default function PayPage() {
@@ -88,16 +86,8 @@ export default function PayPage() {
 
   const handleSelectChain = (chainId: string) => {
     setSelectedChainId(chainId);
-    if (verification?.recipient) {
-      const r = verification.recipient;
-      if (chainId === "tUSD8" && r.walletAddress) setRecipient(r.walletAddress);
-      else if ((chainId === "base" || chainId === "ethereum") && r.evmAddress) setRecipient(r.evmAddress);
-      else if (chainId === "bitcoin" && r.bitcoinAddress) setRecipient(r.bitcoinAddress);
-      else if (chainId === "solana" && r.solanaAddress) setRecipient(r.solanaAddress);
-      else if (chainId === "xrp" && r.xrpAddress) setRecipient(r.xrpAddress);
-      else if (chainId === "cosmos" && r.cosmosAddress) setRecipient(r.cosmosAddress);
-      else if (chainId === "stacks" && r.stacksAddress) setRecipient(r.stacksAddress);
-      else if (chainId === "stellar" && r.stellarAddress) setRecipient(r.stellarAddress);
+    if (verification?.recipient?.walletAddress) {
+      setRecipient(verification.recipient.walletAddress);
     }
   };
 
@@ -554,7 +544,7 @@ export default function PayPage() {
       <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 pb-6 border-b border-white/[0.08]">
         <div>
           <span className="text-xs font-semibold uppercase tracking-wider text-brand-400 block mb-1">
-            Confirmation of Payee &amp; Multi-Chain Intents
+            Confirmation of Payee &amp; On-Chain Settlement
           </span>
           <h1 className="text-2xl sm:text-3xl font-bold text-white tracking-tight">
             Send Verified Payment
@@ -614,7 +604,7 @@ export default function PayPage() {
                     <div className="flex items-center gap-2">
                       <h3 className="text-sm font-semibold text-white">Conversational Intent Resolver</h3>
                       <span className="text-[10px] font-mono px-2 py-0.5 rounded-full bg-white/[0.04] border border-white/[0.08] text-slate-300">
-                        Chain Signatures MPC
+                        DeepSeek AI + PayQRegistry
                       </span>
                     </div>
                     <p className="text-xs text-slate-400 mt-0.5">
@@ -636,7 +626,7 @@ export default function PayPage() {
                       handleResolveIntent();
                     }
                   }}
-                  placeholder='e.g. "Send $50 to John Kennedy on Base" or "Pay Acme Design 75 tUSD8"'
+                  placeholder='e.g. "Pay 75 tUSD8 to 0x..." or "Send 50 tUSD8 for design invoice"'
                   className="flex-1 bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-2.5 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors"
                 />
                 <button
@@ -764,14 +754,14 @@ export default function PayPage() {
                 </p>
               </div>
 
-              {/* Destination Blockchain Selector */}
+              {/* Settlement Network Selector */}
               <div className="space-y-2 pb-1">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-semibold text-slate-300 block">
-                    Destination Blockchain
+                    Settlement Network
                   </label>
-                  <span className="text-[10px] font-mono text-brand-400">
-                    Model A Intent Bridge &amp; Chain Signatures
+                  <span className="text-[10px] font-mono text-emerald-400">
+                    QDay Aevum Testnet · Chain ID 44005
                   </span>
                 </div>
 
@@ -801,11 +791,11 @@ export default function PayPage() {
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-medium text-slate-300 block">
-                    Recipient Address / Handle ({SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.name || "tUSD8"})
+                    Recipient Address / Handle (QDay Aevum)
                   </label>
-                  <span className="text-[10px] font-mono text-cyan-400 bg-cyan-500/10 border border-cyan-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
+                  <span className="text-[10px] font-mono text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-0.5 rounded-full flex items-center gap-1">
                     <Globe className="h-3 w-3" />
-                    <span>{SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.rail || "Cross-Chain Rail"}</span>
+                    <span>PayQRegistry (tUSD8)</span>
                   </span>
                 </div>
 
@@ -817,33 +807,10 @@ export default function PayPage() {
                       const val = e.target.value;
                       setRecipient(val);
                       if (val.trim()) {
-                        const detected = detectChainFromAddress(val);
-                        const match = SUPPORTED_CHAINS.find(
-                          (c) =>
-                            detected.chain.toLowerCase().includes(c.id) ||
-                            c.name.toLowerCase() === detected.chain.toLowerCase()
-                        );
-                        if (match) setSelectedChainId(match.id);
                         checkPayee(val);
                       }
                     }}
-                    placeholder={
-                      selectedChainId === "tUSD8"
-                        ? "e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e or satoshi.tUSD8"
-                        : selectedChainId === "base" || selectedChainId === "ethereum"
-                        ? "e.g. 0x71C8360f... on Base/Ethereum"
-                        : selectedChainId === "bitcoin"
-                        ? "e.g. bc1qw508d... on Bitcoin"
-                        : selectedChainId === "solana"
-                        ? "e.g. 7xKXtg2CW... on Solana"
-                        : selectedChainId === "xrp"
-                        ? "e.g. r9cZA1mL... on Ripple (XRP)"
-                        : selectedChainId === "cosmos"
-                        ? "e.g. cosmos1hsk... on Cosmos Hub"
-                        : selectedChainId === "stacks"
-                        ? "e.g. SP1P72Z... on Stacks (L2)"
-                        : "e.g. GDQP2KP... on Stellar"
-                    }
+                    placeholder="e.g. 0x9fa9C08Bb83cf70774fd38Ee638ad98D4B6CBDCf"
                     className="w-full bg-white/[0.02] border border-white/[0.08] rounded-xl px-4 py-3 text-sm text-white font-mono placeholder-slate-500 focus:outline-none focus:border-brand-500 transition-colors"
                     required
                   />
@@ -854,22 +821,6 @@ export default function PayPage() {
                     </div>
                   )}
                 </div>
-
-                {selectedChainId !== "tUSD8" && (
-                  <div className="p-3 rounded-xl bg-cyan-500/[0.04] border border-cyan-500/20 text-xs space-y-1">
-                    <div className="flex items-center justify-between text-[11px] text-cyan-300 font-medium">
-                      <span>Cross-Chain Settlement Rail</span>
-                      <span>Target: {SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.name}</span>
-                    </div>
-                    <p className="text-[11px] text-slate-400 leading-relaxed font-mono">
-                      Routing via{" "}
-                      <span className="text-white font-semibold">
-                        {SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.rail}
-                      </span>{" "}
-                      from your tUSD8 treasury account.
-                    </p>
-                  </div>
-                )}
 
                 {/* Inline Confirmation of Payee Status Indicator */}
                 {verification && (
@@ -1344,8 +1295,8 @@ export default function PayPage() {
 
             <div className="flex justify-between items-center py-1">
               <span className="text-slate-400">Settlement Rail</span>
-              <span className="font-mono text-cyan-400 text-xs">
-                {SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.rail || "tUSD8 Nightshade Consensus"}
+              <span className="font-mono text-emerald-400 text-xs">
+                PayQRegistry (tUSD8 · QDay Aevum)
               </span>
             </div>
 
@@ -1402,14 +1353,10 @@ export default function PayPage() {
 
             <div className="space-y-1.5">
               <h3 className="text-lg font-bold text-white tracking-tight">
-                {selectedChainId === "tUSD8"
-                  ? "Confirm in Connected Wallet"
-                  : `Authorize Multi-Chain Transfer (${SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.name || "Cross-Chain"})`}
+                Confirm in Connected Wallet
               </h3>
               <p className="text-xs text-slate-400 leading-relaxed max-w-xs mx-auto">
-                {selectedChainId === "tUSD8"
-                  ? "Please approve the transaction in your connected tUSD8 wallet popup (MetaMask / EVM Wallet / Meteor) to finalize settlement."
-                  : `Please approve the transaction in your connected tUSD8 wallet popup to lock funds and dispatch cross-chain settlement to ${SUPPORTED_CHAINS.find((c) => c.id === selectedChainId)?.name}.`}
+                Please approve the transaction in your connected EVM wallet (MetaMask / Rabby) to settle tUSD8 on QDay Aevum Testnet.
               </p>
             </div>
 
