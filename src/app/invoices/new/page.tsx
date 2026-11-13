@@ -17,16 +17,7 @@ import { detectChainFromAddress } from "@/lib/recipients";
 import { useWallet } from "@/context/WalletContext";
 
 const SUPPORTED_CHAINS = [
-  { id: "tUSD8", name: "QDay Aevum", rail: "Native", badge: "tUSD8" },
-  { id: "base", name: "Base", rail: "Model A / MPC", badge: "BASE" },
-  { id: "ethereum", name: "Ethereum", rail: "Model B / MPC", badge: "ETH" },
-  { id: "arbitrum", name: "Arbitrum", rail: "Model A / MPC", badge: "ARB" },
-  { id: "bitcoin", name: "Bitcoin", rail: "Native / MPC", badge: "BTC" },
-  { id: "solana", name: "Solana", rail: "Model A / Solver", badge: "SOL" },
-  { id: "xrp", name: "Ripple (XRP)", rail: "Model A / Solver", badge: "XRP" },
-  { id: "cosmos", name: "Cosmos", rail: "Model A / Solver", badge: "ATOM" },
-  { id: "stacks", name: "Stacks (L2)", rail: "Model A / Solver", badge: "STX" },
-  { id: "stellar", name: "Stellar", rail: "Model A / Solver", badge: "XLM" },
+  { id: "tUSD8", name: "QDay Aevum", rail: "PayQRegistry", badge: "tUSD8" },
 ];
 
 export default function NewInvoicePage() {
@@ -93,7 +84,7 @@ export default function NewInvoicePage() {
     }
 
     if (recipientAddress.trim().length < 3) {
-      alert("Please enter a valid recipient account or multi-chain address.");
+      alert("Please enter a valid QDay Aevum 0x recipient address.");
       return;
     }
 
@@ -142,10 +133,10 @@ export default function NewInvoicePage() {
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-navy-800">
         <div>
           <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Create Multi-Chain Invoice
+            Create QDay Aevum Invoice
           </h1>
           <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Generate verifiable invoices payable across tUSD8, Base, Stacks, Bitcoin, Solana, and more.
+            Generate verifiable tUSD8 invoices settled on-chain via PayQRegistry.sol (Chain ID 44005).
           </p>
         </div>
 
@@ -162,10 +153,10 @@ export default function NewInvoicePage() {
         <div className="space-y-2 pb-2 border-b border-navy-800">
           <div className="flex items-center justify-between">
             <label className="text-xs font-semibold text-slate-300 block">
-              Settlement Blockchain
+              Settlement Network
             </label>
-            <span className="text-[10px] font-mono text-cyan-400">
-              Model A Solver &amp; Chain Signatures
+            <span className="text-[10px] font-mono text-emerald-400">
+              QDay Aevum Testnet · tUSD8
             </span>
           </div>
 
@@ -239,19 +230,7 @@ export default function NewInvoicePage() {
                 required
                 value={recipientAddress}
                 onChange={(e) => handleAddressChange(e.target.value)}
-                placeholder={
-                  selectedChainId === "tUSD8"
-                    ? "e.g. 0x742d35Cc6634C0532925a3b844Bc454e4438f44e or satoshi.tUSD8"
-                    : selectedChainId === "base" || selectedChainId === "ethereum"
-                    ? "e.g. 0x71C8360f... on Base/Ethereum"
-                    : selectedChainId === "bitcoin"
-                    ? "e.g. tb1qw508d... or bc1... on Bitcoin"
-                    : selectedChainId === "stacks"
-                    ? "e.g. ST1P72Z... on Stacks (L2)"
-                    : selectedChainId === "solana"
-                    ? "e.g. 7xKXtg2CW... on Solana"
-                    : "e.g. r9cZA1mL... or cosmos1..."
-                }
+                placeholder="0x..."
                 className="w-full bg-navy-950 border border-navy-800 rounded-xl px-4 py-2.5 text-xs text-white focus:outline-none focus:border-brand-500 font-mono"
               />
               {verifying && (

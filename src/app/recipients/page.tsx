@@ -368,12 +368,11 @@ export default function RecipientsPage() {
                 </div>
               </div>
 
-              {/* Multi-Chain Address Badges Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-2 text-xs font-mono">
-                {/* tUSD8 */}
+              {/* QDay Aevum Address Badge */}
+              <div className="grid grid-cols-1 gap-2 text-xs font-mono">
                 <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
                   <div className="truncate pr-2">
-                    <span className="text-[10px] text-zinc-500 uppercase block font-sans">QDay Aevum</span>
+                    <span className="text-[10px] text-emerald-400 uppercase block font-sans">QDay Aevum (tUSD8)</span>
                     <span className="text-white truncate block text-[11px]">{r.walletAddress}</span>
                   </div>
                   <button
@@ -383,118 +382,6 @@ export default function RecipientsPage() {
                     {copiedAddress === `${r.id}-tUSD8` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
                   </button>
                 </div>
-
-                {/* EVM */}
-                {r.evmAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-cyan-400 uppercase block font-sans">Base / Ethereum (EVM)</span>
-                      <span className="text-white truncate block text-[11px]">{r.evmAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.evmAddress, `${r.id}-evm`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-evm` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
-
-                {/* Solana */}
-                {r.solanaAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-purple-400 uppercase block font-sans">Solana</span>
-                      <span className="text-white truncate block text-[11px]">{r.solanaAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.solanaAddress, `${r.id}-sol`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-sol` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
-
-                {/* Bitcoin */}
-                {r.bitcoinAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-amber-400 uppercase block font-sans">Bitcoin</span>
-                      <span className="text-white truncate block text-[11px]">{r.bitcoinAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.bitcoinAddress, `${r.id}-btc`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-btc` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
-
-                {/* Ripple XRP */}
-                {r.xrpAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-blue-400 uppercase block font-sans">Ripple (XRP)</span>
-                      <span className="text-white truncate block text-[11px]">{r.xrpAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.xrpAddress, `${r.id}-xrp`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-xrp` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
-
-                {/* Cosmos */}
-                {r.cosmosAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-indigo-400 uppercase block font-sans">Cosmos Hub</span>
-                      <span className="text-white truncate block text-[11px]">{r.cosmosAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.cosmosAddress, `${r.id}-cosmos`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-cosmos` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
-
-                {/* Stacks */}
-                {r.stacksAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-orange-400 uppercase block font-sans">Stacks (Bitcoin L2)</span>
-                      <span className="text-white truncate block text-[11px]">{r.stacksAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.stacksAddress, `${r.id}-stacks`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-stacks` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
-
-                {/* Stellar */}
-                {r.stellarAddress && (
-                  <div className="p-2.5 rounded-xl bg-white/[0.02] border border-white/[0.04] flex items-center justify-between">
-                    <div className="truncate pr-2">
-                      <span className="text-[10px] text-emerald-400 uppercase block font-sans">Stellar</span>
-                      <span className="text-white truncate block text-[11px]">{r.stellarAddress}</span>
-                    </div>
-                    <button
-                      onClick={() => copyToClipboard(r.stellarAddress, `${r.id}-stellar`)}
-                      className="text-slate-500 hover:text-white shrink-0 p-1"
-                    >
-                      {copiedAddress === `${r.id}-stellar` ? <Check className="h-3.5 w-3.5 text-emerald-400" /> : <Copy className="h-3.5 w-3.5" />}
-                    </button>
-                  </div>
-                )}
               </div>
 
               {r.notes && <p className="text-[11px] text-slate-400 font-sans">{r.notes}</p>}

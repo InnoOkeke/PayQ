@@ -38,73 +38,17 @@ export function detectChainFromAddress(addr: string): {
 } {
   const clean = addr.trim();
 
-  // QDay Aevum / EVM
   if (/^0x[a-fA-F0-9]{40}$/.test(clean)) {
     return {
-      chain: "QDay Aevum Testnet (EVM)",
-      rail: "QDay Aevum (tUSD8 / ERC-20)",
+      chain: "QDay Aevum Testnet (Chain ID 44005)",
+      rail: "PayQRegistry (tUSD8)",
       currency: "tUSD8",
     };
   }
 
-  // Bitcoin (SegWit, Taproot, Legacy)
-  if (/^(bc1|[13]|tb1)[a-zA-HJ-NP-Z0-9]{25,62}$/.test(clean)) {
-    return {
-      chain: "Bitcoin",
-      rail: "PayQRegistry CoP (MPC)",
-      currency: "BTC",
-    };
-  }
-
-  // Solana (Base58, 32-44 characters)
-  if (/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(clean) && !clean.includes(".")) {
-    return {
-      chain: "Solana",
-      rail: "tUSD8 Intent Solver (Model A)",
-      currency: "SOL / USDC",
-    };
-  }
-
-  // Ripple / XRP (Starts with r, 25-35 base58 characters)
-  if (/^r[1-9A-HJ-NP-Za-km-z]{24,34}$/.test(clean)) {
-    return {
-      chain: "Ripple (XRP)",
-      rail: "tUSD8 Intent Solver (Model A)",
-      currency: "XRP",
-    };
-  }
-
-  // Cosmos Hub (Starts with cosmos1)
-  if (/^cosmos1[a-z0-9]{38,45}$/.test(clean)) {
-    return {
-      chain: "Cosmos",
-      rail: "tUSD8 Intent Solver (Model A)",
-      currency: "ATOM",
-    };
-  }
-
-  // Stacks Bitcoin L2 (Starts with SP or ST)
-  if (/^S[PT][a-zA-Z0-9]{28,42}$/.test(clean)) {
-    return {
-      chain: "Stacks (Bitcoin L2)",
-      rail: "tUSD8 Intent Solver (Model A)",
-      currency: "STX",
-    };
-  }
-
-  // Stellar (Starts with G, exactly 56 chars)
-  if (/^G[A-Z2-7]{55}$/.test(clean)) {
-    return {
-      chain: "Stellar",
-      rail: "tUSD8 Intent Solver (Model A)",
-      currency: "XLM",
-    };
-  }
-
-  // QDay Aevum
   return {
     chain: "QDay Aevum",
-    rail: "QDay Aevum",
+    rail: "PayQRegistry (tUSD8)",
     currency: "tUSD8",
   };
 }
