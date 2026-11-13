@@ -55,7 +55,7 @@ model Invoice {
   recipientName    String
   recipientAddress String
   amount           Float
-  token            String     @default("NEAR")
+  token            String     @default("tUSD8")
   dueDate          String?
   description      String?
   status           String     @default("PENDING") // DRAFT, PENDING, PAID, CANCELLED
@@ -79,8 +79,8 @@ model Payment {
   invoiceId        String?
   invoice          Invoice? @relation(fields: [invoiceId], references: [id], onDelete: SetNull)
   invoiceReference String?
-  network          String   @default("NEAR Testnet")
-  chainId          Int      @default(0)
+  network          String   @default("QDay Aevum Testnet")
+  chainId          Int      @default(44005)
   status           String   @default("SUCCESS") // PENDING, SUCCESS, FAILED
   createdAt        DateTime @default(now())
   receipt          Receipt?

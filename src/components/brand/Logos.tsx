@@ -6,11 +6,11 @@ interface LogoProps {
 }
 
 /**
- * PaySure AI Official Brand Logo: "The AI Gateway"
+ * PayQ Official Brand Logo: "The Quantum Gateway"
  * Dual convergent fintech chevrons focusing into a bright central AI routing node.
- * Represents lightning-fast AI routing, confident verification, and instant settlement.
+ * Represents post-quantum security on QDay Aevum, Confirmation of Payee, and instant tUSD8 settlement.
  */
-export function PaySureLogo({ className = "h-9 w-9", size = 36 }: LogoProps) {
+export function PayQLogo({ className = "h-9 w-9", size = 36 }: LogoProps) {
   return (
     <svg
       width={size}
@@ -56,5 +56,6 @@ export function PaySureLogo({ className = "h-9 w-9", size = 36 }: LogoProps) {
 }
 
 // Backward-compatible aliases
-export const LogoAiGateway = PaySureLogo;
-export const LogoVerifiedShield = PaySureLogo;
+export const PaySureLogo = PayQLogo;
+export const LogoAiGateway = PayQLogo;
+export const LogoVerifiedShield = PayQLogo;

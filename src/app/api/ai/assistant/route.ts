@@ -191,7 +191,7 @@ Instructions:
         return NextResponse.json({
           reply: pending.length === 0
             ? "You currently have 0 pending invoices. You can upload an invoice or create one using the 'Upload Invoice' button on the dashboard."
-            : `You have ${pending.length} pending invoice(s) totaling ${pending.reduce((acc, i) => acc + i.amount, 0)} NEAR. All payments are verified with Confirmation of Payee on NEAR Protocol.`,
+            : `You have ${pending.length} pending invoice(s) totaling ${pending.reduce((acc, i) => acc + i.amount, 0)} tUSD8. All payments are verified with Confirmation of Payee on QDay Aevum.`,
           provider: AI_PROVIDER_NAME,
         });
       }
@@ -199,7 +199,7 @@ Instructions:
       if (lower.includes("status") || lower.includes("unverified") || lower.includes("verification")) {
         return NextResponse.json({
           reply:
-            "Confirmation of Payee statuses on NEAR:\n• VERIFIED: Matched on-chain with registered payee entity.\n• WARNING: Information has recent updates or flags.\n• UNVERIFIED: Account has no registered record in PaySure.\n• MISMATCH: Account on invoice contradicts known payee account (High Risk)!",
+            "Confirmation of Payee statuses on QDay Aevum:\n• VERIFIED: Matched on-chain in PayQRegistry with registered payee entity.\n• WARNING: Recent key or profile rotation flagged.\n• UNVERIFIED: Address has no registered record in PayQ yet.\n• MISMATCH: Address on invoice contradicts known payee identity (High Risk)!",
           provider: AI_PROVIDER_NAME,
         });
       }
@@ -207,14 +207,14 @@ Instructions:
       if (lower.includes("faucet") || lower.includes("token") || lower.includes("gas")) {
         return NextResponse.json({
           reply:
-            "To get test tokens for NEAR Testnet:\n1. Create or open a testnet wallet: https://testnet.mynearwallet.com\n2. Free testnet NEAR tokens are automatically allocated to your testnet account.\n3. Verify your balance in the PaySure AI top navbar.",
+            "To get test tokens for QDay Aevum Testnet (Chain ID 44005):\n1. Visit the official faucet: https://faucet.qday.info\n2. Claim tQDAY (gas) and tUSD8 (test stablecoin, 6 decimals).\n3. Your live balances will appear in the PayQ top navbar.",
           provider: AI_PROVIDER_NAME,
         });
       }
 
       return NextResponse.json({
         reply:
-          "PaySure AI Copilot is online, running with NEAR.AI Cloud and OutLayer agent guardrails. Ask about invoice statuses, multi-chain intents, or testnet settlements.",
+          "PayQ AI Copilot is online on QDay Aevum Testnet (Chain ID 44005). Ask about invoice statuses, tUSD8 settlements, Confirmation of Payee, or treasury guardrails.",
         provider: AI_PROVIDER_NAME,
       });
     }

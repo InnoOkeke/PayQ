@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createPublicClient, formatUnits, http, isAddress } from "viem";
 import { findCounterparty, detectChainFromAddress } from "@/lib/recipients";
-import { isValidNearAccountId } from "@/lib/near/config";
+import {
+  AEVUM_CONFIG,
+  ERC20_ABI,
+  PAYQ_REGISTRY_ABI,
+  qdayAevumTestnet,
+} from "@/lib/aevum/config";
 
 export const dynamic = "force-dynamic";
+
+const aevumClient = createPublicClient({
+  chain: qdayAevumTestnet,
+  transport: http(AEVUM_CONFIG.rpcUrl),
+});
 
 export async function POST(req: NextRequest) {
   try {
@@ -20,31 +31,11 @@ export async function POST(req: NextRequest) {
     }
 
     const rawAddress = address.trim();
-    let cleanAddress = rawAddress.toLowerCase();
-
-    // Detect destination blockchain architecture
     const chainInfo = detectChainFromAddress(rawAddress);
 
-    // If it's a cross-chain address (non-NEAR)
-    if (chainInfo.chain !== "NEAR Protocol") {
+    // Non-EVM addresses fallback
+    if (!isAddress(rawAddress)) {
       const recipient = await findCounterparty(rawAddress, paymentId);
-
-      if (recipient && recipient.verificationStatus === "VERIFIED") {
-        return NextResponse.json({
-          status: "VERIFIED",
-          isVerified: true,
-          chain: chainInfo.chain,
-          targetChain: chainInfo.chain,
-          settlementRail: chainInfo.rail,
-          currency: chainInfo.currency,
-          displayName: recipient.displayName,
-          paymentId: recipient.paymentId,
-          walletAddress: rawAddress,
-          nearAccountId: recipient.walletAddress,
-          reason: `Verified ${chainInfo.chain} address for '${recipient.displayName}'. Settlement routes via ${chainInfo.rail}.`,
-        });
-      }
-
       if (recipient) {
         return NextResponse.json({
           status: recipient.verificationStatus || "WARNING",
@@ -54,12 +45,11 @@ export async function POST(req: NextRequest) {
           settlementRail: chainInfo.rail,
           currency: chainInfo.currency,
           displayName: recipient.displayName,
+          paymentId: recipient.paymentId,
           walletAddress: rawAddress,
-          reason: `${chainInfo.chain} address matched to '${recipient.displayName}'. Status: ${recipient.verificationStatus}.`,
+          reason: `Matched '${recipient.displayName}' in PayQ directory (${chainInfo.chain}).`,
         });
       }
-
-      // Valid cross-chain address, routes via Intent Solver or MPC
       return NextResponse.json({
         status: "UNVERIFIED",
         isVerified: false,
@@ -68,77 +58,88 @@ export async function POST(req: NextRequest) {
         settlementRail: chainInfo.rail,
         currency: chainInfo.currency,
         walletAddress: rawAddress,
-        reason: `Valid ${chainInfo.chain} destination address. Routes via ${chainInfo.rail}. No corporate KYC attestation filed in PaySure directory yet.`,
+        reason: `Address is not a valid QDay Aevum (0x...) EVM address and is not registered in the PayQ directory.`,
       });
     }
 
-    // NEAR Protocol address handling
-    if (cleanAddress.endsWith(".tesnet")) {
-      cleanAddress = cleanAddress.replace(/\.tesnet$/, ".testnet");
-    }
-
-    // Query live NEAR blockchain RPC to verify if account actually exists on NEAR Testnet
-    let liveOnChain = false;
-    let onChainBalance = "0";
+    // 1. Check live QDay Aevum Testnet on-chain balances (tQDAY & tUSD8)
+    let tusd8Balance = "0.00";
+    let tqdayBalance = "0.0000";
     try {
-      const rpcRes = await fetch("https://rpc.testnet.near.org", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          jsonrpc: "2.0",
-          id: "verify-near-account",
-          method: "query",
-          params: {
-            request_type: "view_account",
-            finality: "final",
-            account_id: cleanAddress,
-          },
-        }),
-      });
-      const rpcData = await rpcRes.json();
-      if (rpcData.result?.amount) {
-        liveOnChain = true;
-        const yocto = BigInt(rpcData.result.amount);
-        const whole = yocto / BigInt("1000000000000000000000000");
-        onChainBalance = whole.toString();
-      }
+      const [nativeBal, tusd8Bal] = await Promise.all([
+        aevumClient.getBalance({ address: rawAddress }),
+        aevumClient.readContract({
+          address: AEVUM_CONFIG.tusd8Address,
+          abi: ERC20_ABI,
+          functionName: "balanceOf",
+          args: [rawAddress],
+        }) as Promise<bigint>,
+      ]);
+      tqdayBalance = Number(formatUnits(nativeBal, 18)).toFixed(4);
+      tusd8Balance = Number(formatUnits(tusd8Bal, AEVUM_CONFIG.tusd8Decimals)).toFixed(2);
     } catch (e) {
-      console.error("Live NEAR RPC check error:", e);
+      console.warn("Aevum RPC balance check warning:", e);
     }
 
-    if (!liveOnChain) {
-      return NextResponse.json({
-        status: "UNVERIFIED",
-        isVerified: false,
-        walletAddress: cleanAddress,
-        chain: "NEAR Protocol",
-        targetChain: "NEAR Protocol",
-        settlementRail: "NEAR Native",
-        reason: `CRITICAL ALERT: Account '${cleanAddress}' does not exist on NEAR Testnet (verified against live RPC https://rpc.testnet.near.org). Do not send funds!`,
-      });
+    // 2. Check on-chain PayQRegistry if deployed
+    if (AEVUM_CONFIG.payqRegistryAddress) {
+      try {
+        const [onChainStatus, registeredName] = (await aevumClient.readContract({
+          address: AEVUM_CONFIG.payqRegistryAddress,
+          abi: PAYQ_REGISTRY_ABI,
+          functionName: "verifyPayee",
+          args: [rawAddress, name || ""],
+        })) as [string, string, number];
+
+        if (onChainStatus === "MISMATCH") {
+          return NextResponse.json({
+            status: "MISMATCH",
+            isVerified: false,
+            displayName: registeredName,
+            walletAddress: rawAddress,
+            chain: "QDay Aevum Testnet",
+            targetChain: "QDay Aevum Testnet",
+            settlementRail: "PayQRegistry (On-Chain CoP)",
+            currency: "tUSD8",
+            reason: `CRITICAL MISMATCH (On-Chain): Expected '${name}', but PayQRegistry binds ${rawAddress} to '${registeredName}'.`,
+          });
+        }
+
+        if (onChainStatus === "VERIFIED") {
+          return NextResponse.json({
+            status: "VERIFIED",
+            isVerified: true,
+            displayName: registeredName,
+            walletAddress: rawAddress,
+            chain: "QDay Aevum Testnet",
+            targetChain: "QDay Aevum Testnet",
+            settlementRail: "PayQRegistry (On-Chain CoP)",
+            currency: "tUSD8",
+            reason: `On-Chain CoP VERIFIED on QDay Aevum: '${registeredName}' (${tusd8Balance} tUSD8, ${tqdayBalance} tQDAY).`,
+          });
+        }
+      } catch (e) {
+        console.warn("PayQRegistry on-chain check skipped:", e);
+      }
     }
 
-    // Look up counterparty in verified registry
-    const recipient = await findCounterparty(cleanAddress, paymentId);
-
+    // 3. Directory lookup + name mismatch guard
+    const recipient = await findCounterparty(rawAddress, paymentId);
     if (recipient && recipient.verificationStatus === "VERIFIED") {
-      // Check for name mismatch if an invoice name was provided
       if (name && name.trim().length > 0) {
         const cleanReqName = name.trim().toLowerCase();
         const cleanRegName = recipient.displayName.toLowerCase();
-        if (
-          !cleanRegName.includes(cleanReqName) &&
-          !cleanReqName.includes(cleanRegName)
-        ) {
+        if (!cleanRegName.includes(cleanReqName) && !cleanReqName.includes(cleanRegName)) {
           return NextResponse.json({
             status: "MISMATCH",
             isVerified: false,
             displayName: recipient.displayName,
-            walletAddress: cleanAddress,
-            chain: "NEAR Protocol",
-            targetChain: "NEAR Protocol",
-            settlementRail: "NEAR Native",
-            reason: `CRITICAL MISMATCH: Invoice names payee as '${name}', but account ID is registered to '${recipient.displayName}'. Fraud risk alert!`,
+            walletAddress: rawAddress,
+            chain: "QDay Aevum Testnet",
+            targetChain: "QDay Aevum Testnet",
+            settlementRail: "QDay Aevum (tUSD8)",
+            currency: "tUSD8",
+            reason: `CRITICAL MISMATCH: Invoice names payee as '${name}', but address is registered to '${recipient.displayName}'. Fraud risk alert!`,
           });
         }
       }
@@ -148,11 +149,12 @@ export async function POST(req: NextRequest) {
         isVerified: true,
         displayName: recipient.displayName,
         paymentId: recipient.paymentId,
-        walletAddress: recipient.walletAddress,
-        chain: "NEAR Protocol",
-        targetChain: "NEAR Protocol",
-        settlementRail: "NEAR Native",
-        reason: `Account '${cleanAddress}' is live on NEAR Testnet and matches verified entity '${recipient.displayName}'. Confirmation of Payee passed.`,
+        walletAddress: rawAddress,
+        chain: "QDay Aevum Testnet",
+        targetChain: "QDay Aevum Testnet",
+        settlementRail: "QDay Aevum (tUSD8)",
+        currency: "tUSD8",
+        reason: `Address verified for '${recipient.displayName}' on QDay Aevum Testnet (${tusd8Balance} tUSD8, ${tqdayBalance} tQDAY). Confirmation of Payee passed.`,
       });
     }
 
@@ -161,23 +163,24 @@ export async function POST(req: NextRequest) {
         status: recipient.verificationStatus || "WARNING",
         isVerified: recipient.verificationStatus === "VERIFIED",
         displayName: recipient.displayName,
-        walletAddress: cleanAddress,
-        chain: "NEAR Protocol",
-        targetChain: "NEAR Protocol",
-        settlementRail: "NEAR Native",
-        reason: `Account is active on NEAR Testnet (balance: ~${onChainBalance} NEAR). Organization attestation status: ${recipient.verificationStatus}.`,
+        walletAddress: rawAddress,
+        chain: "QDay Aevum Testnet",
+        targetChain: "QDay Aevum Testnet",
+        settlementRail: "QDay Aevum (tUSD8)",
+        currency: "tUSD8",
+        reason: `QDay Aevum address matched to '${recipient.displayName}' (${tusd8Balance} tUSD8). Status: ${recipient.verificationStatus}.`,
       });
     }
 
-    // Account exists on NEAR testnet but not registered in PaySure KYC
     return NextResponse.json({
       status: "UNVERIFIED",
       isVerified: false,
-      walletAddress: cleanAddress,
-      chain: "NEAR Protocol",
-      targetChain: "NEAR Protocol",
-      settlementRail: "NEAR Native",
-      reason: `Live active NEAR Testnet account confirmed on-chain (balance: ~${onChainBalance} NEAR). No business KYC attestation filed in PaySure yet.`,
+      walletAddress: rawAddress,
+      chain: "QDay Aevum Testnet",
+      targetChain: "QDay Aevum Testnet",
+      settlementRail: "QDay Aevum (tUSD8)",
+      currency: "tUSD8",
+      reason: `Valid QDay Aevum address (${tusd8Balance} tUSD8, ${tqdayBalance} tQDAY). Not yet attested in PayQ Confirmation of Payee directory.`,
     });
   } catch (error: any) {
     return NextResponse.json({ error: error.message }, { status: 500 });

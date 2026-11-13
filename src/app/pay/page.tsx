@@ -20,22 +20,15 @@ import {
 } from "lucide-react";
 import confetti from "canvas-confetti";
 import jsPDF from "jspdf";
-import { useNearWallet } from "@/context/NearWalletContext";
-import { NEAR_CONFIG, isValidNearAccountId } from "@/lib/near/config";
-import { isEVMAddress, deriveEVMAddressFromNear } from "@/lib/near/chainSignatures";
+import { useWallet } from "@/context/WalletContext";
+import { AEVUM_CONFIG, isValidAevumAddress, explorerTxUrl } from "@/lib/aevum/config";
 import { detectChainFromAddress } from "@/lib/recipients";
 import { formatCurrency } from "@/lib/utils";
 
 const SUPPORTED_CHAINS = [
-  { id: "near", name: "NEAR Protocol", rail: "NEAR Native", badge: "NEAR", color: "text-emerald-400" },
-  { id: "base", name: "Base", rail: "Model A / Solver", badge: "BASE", color: "text-blue-400" },
-  { id: "ethereum", name: "Ethereum", rail: "NEAR Chain Signatures", badge: "ETH", color: "text-indigo-400" },
-  { id: "bitcoin", name: "Bitcoin", rail: "NEAR Chain Signatures", badge: "BTC", color: "text-amber-400" },
-  { id: "solana", name: "Solana", rail: "Model A / Solver", badge: "SOL", color: "text-purple-400" },
-  { id: "xrp", name: "Ripple (XRP)", rail: "Model A / Solver", badge: "XRP", color: "text-blue-300" },
-  { id: "cosmos", name: "Cosmos", rail: "Model A / Solver", badge: "ATOM", color: "text-teal-400" },
-  { id: "stacks", name: "Stacks (L2)", rail: "Model A / Solver", badge: "STX", color: "text-orange-400" },
-  { id: "stellar", name: "Stellar", rail: "Model A / Solver", badge: "XLM", color: "text-emerald-300" },
+  { id: "aevum", name: "QDay Aevum Testnet", rail: "QDay Aevum (tUSD8 / ERC-20)", badge: "AEVUM", color: "text-emerald-400" },
+  { id: "base", name: "Base", rail: "EVM Bridge", badge: "BASE", color: "text-blue-400" },
+  { id: "ethereum", name: "Ethereum", rail: "EVM Bridge", badge: "ETH", color: "text-indigo-400" },
 ];
 
 export default function PayPage() {
@@ -48,13 +41,13 @@ export default function PayPage() {
   const memoParam = searchParams.get("memo");
   const txHashParam = searchParams.get("transactionHashes");
 
-  const { accountId, isConnected, balance, connect, sendNearPayment, sendChainSignaturePayment } = useNearWallet();
+  const { accountId, isConnected, balance, connect, sendTusd8Payment, sendNativePayment } = useWallet();
 
   // Workflow states
   const [recipient, setRecipient] = useState(recipientParam || "");
-  const [selectedChainId, setSelectedChainId] = useState<string>(networkParam || "near");
+  const [selectedChainId, setSelectedChainId] = useState<string>(networkParam || "aevum");
   const [amount, setAmount] = useState(amountParam || "");
-  const [tokenSymbol, setTokenSymbol] = useState("NEAR");
+  const [tokenSymbol, setTokenSymbol] = useState("tUSD8");
   const [invoiceReference, setInvoiceReference] = useState(memoParam || "");
   const [invoiceId, setInvoiceId] = useState(invoiceIdParam || "");
 
@@ -88,11 +81,9 @@ export default function PayPage() {
     (resolvedIntent?.policyCheck ? !resolvedIntent.policyCheck.isAllowed : false);
 
   const sampleIntents = [
-    "Pay LeProf 20 NEAR on Solana",
-    "Send $50 to Acme Design on Base",
-    "Transfer $120 to Satoshi on Stacks L2",
-    "Pay LeProf 15 NEAR on Ripple (XRP)",
-    "Send $200 to Acme on Bitcoin",
+    "Pay Acme Design 50 tUSD8 on Aevum",
+    "Send 120 tUSD8 to Satoshi Dev",
+    "Pay LeProf 25 tUSD8 for Audit",
   ];
 
   const handleSelectChain = (chainId: string) => {
@@ -136,18 +127,16 @@ export default function PayPage() {
   };
 
   const isValidRecipient = (addr: string) => {
-    return !!addr && addr.trim().length > 2;
+    return isValidAevumAddress(addr) || (!!addr && addr.trim().length > 2);
   };
 
   const handleApplyResolvedIntent = () => {
     if (!resolvedIntent) return;
     const targetAddr =
-      resolvedIntent.targetChain !== "NEAR Protocol" && resolvedIntent.resolvedPayee.targetChainAddress
-        ? resolvedIntent.resolvedPayee.targetChainAddress
-        : resolvedIntent.resolvedPayee.accountId;
+      resolvedIntent.resolvedPayee.targetChainAddress || resolvedIntent.resolvedPayee.accountId;
     setRecipient(targetAddr);
     setAmount(resolvedIntent.extractedAmount.toString());
-    setTokenSymbol(resolvedIntent.extractedCurrency === "NEAR" ? "NEAR" : "USDC");
+    setTokenSymbol(resolvedIntent.extractedCurrency === "tQDAY" ? "tQDAY" : "tUSD8");
     setInvoiceReference(resolvedIntent.memo);
 
     const matchChain = SUPPORTED_CHAINS.find((c) =>
@@ -361,43 +350,7 @@ export default function PayPage() {
   };
 
   const handlePayWithMyNearWallet = async () => {
-    if (!recipient || !isValidRecipient(recipient)) {
-      alert("Please enter a valid destination recipient address or NEAR account.");
-      return;
-    }
-    if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid amount.");
-      return;
-    }
-    if (isInsufficientBalance) {
-      alert(`Insufficient funds. Your available balance is ${balance} NEAR.`);
-      return;
-    }
-
-    const isCrossChain = selectedChainId !== "near";
-    const nearReceiverId = isCrossChain ? "v1.signer-prod.testnet" : recipient;
-
-    setPendingError(null);
-    try {
-      const actionId = await prepareAndConfirmPayment();
-      const currentUrl = typeof window !== "undefined" ? window.location.origin + "/pay" : "";
-      const redirectUrl = `${currentUrl}?recipient=${encodeURIComponent(recipient)}&amount=${encodeURIComponent(
-        amount
-      )}&invoiceId=${encodeURIComponent(invoiceId || "")}&network=${encodeURIComponent(
-        selectedChainId
-      )}&memo=${encodeURIComponent(invoiceReference || "")}&payerAccount=${encodeURIComponent(
-        accountId || ""
-      )}&pendingActionId=${encodeURIComponent(actionId || "")}`;
-
-      const walletUrl = `${NEAR_CONFIG.walletUrl}/send-money?recipient=${encodeURIComponent(
-        nearReceiverId
-      )}&amount=${encodeURIComponent(amount)}&redirect_url=${encodeURIComponent(redirectUrl)}`;
-
-      window.location.href = walletUrl;
-    } catch (err: any) {
-      setPendingError(err.message || "Failed to prepare payment approval.");
-      alert(err.message || "Failed to prepare payment approval.");
-    }
+    await handleExecutePayment();
   };
 
   const checkPayee = async (addr: string, name?: string) => {
@@ -467,18 +420,19 @@ export default function PayPage() {
     try {
       actionId = await prepareAndConfirmPayment();
       let txHash = "";
-      const isEvm = isEVMAddress(recipient);
-      const isBtc = /^(bc1|[13]|tb1)/.test(recipient);
 
-      if (isEvm || isBtc) {
-        txHash = await sendChainSignaturePayment(recipient, amount);
-      } else if (selectedChainId === "near") {
-        txHash = await sendNearPayment(recipient, amount);
+      if (tokenSymbol === "tQDAY") {
+        txHash = await sendNativePayment(recipient, amount);
       } else {
-        txHash = await sendNearPayment("v1.signer-prod.testnet", amount);
+        txHash = await sendTusd8Payment(
+          recipient,
+          amount,
+          invoiceReference || `INV-${Date.now().toString().slice(-4)}`,
+          verification?.displayName || ""
+        );
       }
 
-      const finalHash = txHash || `NEAR-LIVE-${Date.now()}`;
+      const finalHash = txHash || `AEVUM-LIVE-${Date.now()}`;
       const activeChain = SUPPORTED_CHAINS.find((c) => c.id === selectedChainId) || SUPPORTED_CHAINS[0];
 
       const res = await fetch("/api/payments", {
@@ -488,12 +442,12 @@ export default function PayPage() {
           senderAddress: accountId,
           recipientAddress: recipient,
           amount: parseFloat(amount),
-          tokenAddress: tokenSymbol === "NEAR" ? "native.near" : "usdc.fakes.testnet",
+          tokenAddress: tokenSymbol === "tQDAY" ? "native.tqday" : AEVUM_CONFIG.tusd8Address,
           transactionHash: finalHash,
           invoiceId: invoiceId || null,
           invoiceReference: invoiceReference || `INV-${Date.now().toString().slice(-4)}`,
           network: activeChain.name,
-          chainId: selectedChainId === "near" ? 0 : 1,
+          chainId: AEVUM_CONFIG.chainId,
         }),
       });
 
@@ -536,12 +490,12 @@ export default function PayPage() {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
-    doc.text("PaySure AI — Verifiable Payment Receipt", 14, 22);
+    doc.text("PayQ — Verifiable Payment Receipt", 14, 22);
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
-    doc.text(`Protocol: NEAR Protocol (Testnet)`, 14, 30);
+    doc.text(`Protocol: QDay Aevum Testnet (Chain ID 44005)`, 14, 30);
     doc.text(`Receipt ID: ${receiptData.receipt?.receiptNumber || receiptData.id}`, 14, 36);
     doc.text(`Timestamp: ${new Date(receiptData.createdAt).toUTCString()}`, 14, 42);
 
@@ -586,12 +540,12 @@ export default function PayPage() {
     doc.setFont("helvetica", "normal");
     doc.setTextColor(100);
     doc.text(
-      "This transaction was validated by PaySure AI and settled via NEAR Protocol.",
+      "This transaction was validated by PayQ Confirmation of Payee and settled on QDay Aevum.",
       14,
       126
     );
 
-    doc.save(`PaySure_Receipt_${receiptData.invoiceReference || "NEAR"}.pdf`);
+    doc.save(`PayQ_Receipt_${receiptData.invoiceReference || "AEVUM"}.pdf`);
   };
 
   return (
@@ -1262,11 +1216,11 @@ export default function PayPage() {
               </span>
             </div>
 
-            {(isEVMAddress(recipient) || selectedChainId === "ethereum" || selectedChainId === "base" || selectedChainId === "arbitrum") && (
+            {isValidAevumAddress(recipient) && (
               <div className="flex justify-between items-center py-1.5 border-b border-white/[0.06]">
-                <span className="text-slate-400">NEAR MPC EVM Signer</span>
+                <span className="text-slate-400">Aevum Token Contract</span>
                 <span className="font-mono text-[11px] text-brand-300 truncate max-w-[260px]">
-                  {deriveEVMAddressFromNear(accountId || "company.testnet")}
+                  {tokenSymbol === "tQDAY" ? "Native tQDAY" : AEVUM_CONFIG.tusd8Address}
                 </span>
               </div>
             )}
@@ -1396,9 +1350,9 @@ export default function PayPage() {
             </div>
 
             <div className="flex justify-between items-center py-1">
-              <span className="text-slate-400">NEAR Settlement Hash</span>
+              <span className="text-slate-400">Aevum Settlement Hash</span>
               <a
-                href={`${NEAR_CONFIG.explorerUrl}/txns/${receiptData.transactionHash}`}
+                href={explorerTxUrl(receiptData.transactionHash)}
                 target="_blank"
                 rel="noreferrer"
                 className="font-mono text-brand-400 hover:text-brand-300 inline-flex items-center gap-1"

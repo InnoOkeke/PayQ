@@ -4,7 +4,7 @@ import { ReactNode, useState, useEffect } from "react";
 import { WagmiProvider } from "wagmi";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { wagmiConfig } from "@/lib/wagmi";
-import { NearWalletProvider } from "@/context/NearWalletContext";
+import { WalletProvider } from "@/context/WalletContext";
 
 export function Web3Provider({ children }: { children: ReactNode }) {
   const [queryClient] = useState(
@@ -27,11 +27,10 @@ export function Web3Provider({ children }: { children: ReactNode }) {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <NearWalletProvider>
+        <WalletProvider>
           {mounted ? children : <div className="min-h-screen bg-[#070B14]" />}
-        </NearWalletProvider>
+        </WalletProvider>
       </QueryClientProvider>
     </WagmiProvider>
   );
 }
-

@@ -1,17 +1,13 @@
 import { http, createConfig, injected } from "wagmi";
-import { baseSepolia, sepolia } from "viem/chains";
+import { qdayAevumTestnet, AEVUM_CONFIG } from "@/lib/aevum/config";
 
-// Supported cross-chain EVM networks for NEAR Chain Signatures (MPC)
-export const SUPPORTED_EVM_CHAINS = [baseSepolia, sepolia] as const;
+export const SUPPORTED_EVM_CHAINS = [qdayAevumTestnet] as const;
 
 export const wagmiConfig = createConfig({
-  chains: [baseSepolia, sepolia],
-  connectors: [
-    injected(),
-  ],
+  chains: [qdayAevumTestnet],
+  connectors: [injected()],
   transports: {
-    [baseSepolia.id]: http("https://sepolia.base.org"),
-    [sepolia.id]: http("https://rpc.sepolia.org"),
+    [qdayAevumTestnet.id]: http(AEVUM_CONFIG.rpcUrl),
   },
   ssr: true,
 });

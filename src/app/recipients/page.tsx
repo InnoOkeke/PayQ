@@ -15,11 +15,11 @@ import {
   Copy,
   Check
 } from "lucide-react";
-import { useNearWallet } from "@/context/NearWalletContext";
-import { NEAR_CONFIG } from "@/lib/near/config";
+import { useWallet } from "@/context/WalletContext";
+import { explorerAddressUrl } from "@/lib/aevum/config";
 
 export default function RecipientsPage() {
-  const { accountId } = useNearWallet();
+  const { accountId } = useWallet();
 
   // Search & verification states
   const [searchAddress, setSearchAddress] = useState("");
@@ -324,11 +324,11 @@ export default function RecipientsPage() {
 
                 <div className="flex items-center gap-2">
                   <a
-                    href={`${NEAR_CONFIG.explorerUrl}/address/${r.walletAddress}`}
+                    href={explorerAddressUrl(r.walletAddress)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-lg bg-navy-800 hover:bg-navy-750 text-slate-300 hover:text-white transition-colors"
-                    title="View on NEARBlocks"
+                    title="View on Aevum Explorer"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>

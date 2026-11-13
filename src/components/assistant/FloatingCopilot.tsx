@@ -19,8 +19,8 @@ import {
   CheckCircle2,
   AlertTriangle
 } from "lucide-react";
-import { PaySureLogo } from "@/components/brand/Logos";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { PayQLogo } from "@/components/brand/Logos";
+import { useWallet } from "@/context/WalletContext";
 
 interface Message {
   role: "user" | "assistant";
@@ -31,7 +31,7 @@ interface Message {
 export function FloatingCopilot() {
   const pathname = usePathname();
   const router = useRouter();
-  const { isConnected, balance } = useNearWallet();
+  const { isConnected, balance } = useWallet();
   const [isOpen, setIsOpen] = useState(false);
   const [hasDismissedTeaser, setHasDismissedTeaser] = useState(false);
   const [showTeaser, setShowTeaser] = useState(false);
@@ -40,7 +40,7 @@ export function FloatingCopilot() {
     {
       role: "assistant",
       content:
-        "Hello! I am your PaySure Autonomous AI Agent. Ask me to verify counterparties, summarize pending invoices, or execute cross-chain intents across Stacks, Solana, Bitcoin, Base, and NEAR Protocol.",
+        "Hello! I am your PayQ Autonomous AI Agent on QDay Aevum Testnet. Ask me to verify counterparties, summarize pending invoices, or execute tUSD8 stablecoin intents.",
     },
   ]);
   const [input, setInput] = useState("");
@@ -74,8 +74,8 @@ export function FloatingCopilot() {
       };
     }
     return {
-      title: "PaySure AI Copilot",
-      prompt: "Send cross-chain transfers or ask questions about counterparties & guardrails!",
+      title: "PayQ AI Copilot",
+      prompt: "Send tUSD8 transfers on QDay Aevum or ask about counterparties & guardrails!",
     };
   };
 
@@ -285,17 +285,17 @@ export function FloatingCopilot() {
           {/* Header */}
           <div className="flex items-center justify-between px-4 py-3.5 border-b border-navy-800 bg-navy-950/60">
             <div className="flex items-center gap-2.5">
-              <PaySureLogo size={28} />
+              <PayQLogo size={28} />
               <div>
                 <div className="flex items-center gap-1.5">
-                  <h3 className="text-xs font-bold text-white">PaySure AI Copilot</h3>
+                  <h3 className="text-xs font-bold text-white">PayQ AI Copilot</h3>
                   <span className="text-[9px] font-mono px-1.5 py-0.2 rounded-full bg-brand-500/20 text-brand-300 border border-brand-500/30">
                     Agent
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5 text-[10px] text-slate-400">
                   <span className="flex h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                  <span>Online &bull; Grounded in NEAR Context</span>
+                  <span>Online &bull; QDay Aevum Testnet</span>
                 </div>
               </div>
             </div>

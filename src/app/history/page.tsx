@@ -15,11 +15,11 @@ import {
 } from "lucide-react";
 import jsPDF from "jspdf";
 import { formatAddress, formatCurrency } from "@/lib/utils";
-import { NEAR_CONFIG } from "@/lib/near/config";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { explorerTxUrl } from "@/lib/aevum/config";
+import { useWallet } from "@/context/WalletContext";
 
 export default function HistoryPage() {
-  const { accountId, isConnected } = useNearWallet();
+  const { accountId, isConnected } = useWallet();
   const [payments, setPayments] = useState<any[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -55,13 +55,13 @@ export default function HistoryPage() {
 
     doc.setFont("helvetica", "bold");
     doc.setFontSize(20);
-    doc.text("PaySure AI — Payment Receipt", 14, 22);
+    doc.text("PayQ — Payment Receipt", 14, 22);
 
     doc.setFontSize(10);
     doc.setFont("helvetica", "normal");
-    doc.text(`Receipt #: ${p.receipt?.receiptNumber || "RCP-NEAR"}`, 14, 32);
+    doc.text(`Receipt #: ${p.receipt?.receiptNumber || "RCP-AEVUM"}`, 14, 32);
     doc.text(`Date: ${new Date(p.createdAt).toUTCString()}`, 14, 38);
-    doc.text(`Network: NEAR Protocol (Testnet)`, 14, 44);
+    doc.text(`Network: QDay Aevum Testnet (Chain ID 44005)`, 14, 44);
 
     doc.line(14, 48, 196, 48);
 
@@ -69,15 +69,15 @@ export default function HistoryPage() {
     doc.text("Payment Audit Details", 14, 56);
 
     doc.setFont("helvetica", "normal");
-    doc.text(`Sender (NEAR Account): ${p.senderAddress}`, 14, 66);
-    doc.text(`Recipient (NEAR Account): ${p.recipientAddress}`, 14, 74);
-    doc.text(`Amount: ${formatCurrency(p.amount)} NEAR`, 14, 82);
+    doc.text(`Sender (Aevum Address): ${p.senderAddress}`, 14, 66);
+    doc.text(`Recipient (Aevum Address): ${p.recipientAddress}`, 14, 74);
+    doc.text(`Amount: ${formatCurrency(p.amount)} tUSD8`, 14, 82);
     doc.text(`Invoice Ref: ${p.invoiceReference || "Direct Transfer"}`, 14, 90);
     doc.text(`Transaction Hash: ${p.transactionHash}`, 14, 98);
-    doc.text(`Explorer: ${NEAR_CONFIG.explorerUrl}/txns/${p.transactionHash}`, 14, 106);
+    doc.text(`Explorer: ${explorerTxUrl(p.transactionHash)}`, 14, 106);
 
     doc.line(14, 114, 196, 114);
-    doc.text("Validated by PaySure AI Confirmation of Payee and settled on NEAR Protocol.", 14, 124);
+    doc.text("Validated by PayQ Confirmation of Payee and settled on QDay Aevum.", 14, 124);
 
     doc.save(`Receipt_${p.receipt?.receiptNumber || p.transactionHash.slice(0, 8)}.pdf`);
   };
@@ -213,7 +213,7 @@ export default function HistoryPage() {
               <div className="flex items-center justify-between md:justify-end gap-4">
                 <div className="text-right">
                   <span className="text-base font-bold text-white block">
-                    {formatCurrency(p.amount)} <span className="text-xs font-normal text-brand-300">NEAR</span>
+                    {formatCurrency(p.amount)} <span className="text-xs font-normal text-brand-300">tUSD8</span>
                   </span>
                   <span className="text-[10px] uppercase font-bold text-emerald-400 bg-emerald-400/10 px-2 py-0.5 rounded-full border border-emerald-400/20">
                     Confirmed
@@ -222,11 +222,11 @@ export default function HistoryPage() {
 
                 <div className="flex items-center gap-2">
                   <a
-                    href={`${NEAR_CONFIG.explorerUrl}/txns/${p.transactionHash}`}
+                    href={explorerTxUrl(p.transactionHash)}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="p-2 rounded-xl bg-navy-800 hover:bg-navy-750 text-slate-300 hover:text-white transition-colors"
-                    title="View on NEARBlocks"
+                    title="View on Aevum Explorer"
                   >
                     <ExternalLink className="h-4 w-4" />
                   </a>

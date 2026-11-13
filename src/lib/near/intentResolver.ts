@@ -113,21 +113,21 @@ export function resolveNaturalLanguageIntent(
 
   // 1. Extract Amount & Currency
   let extractedAmount = 50;
-  let extractedCurrency = "USD";
+  let extractedCurrency = "tUSD8";
 
-  const amountMatch = clean.match(/(?:\$|usd\s*|near\s*)?(\d+(?:\.\d{1,2})?)\s*(usd|near|usdc|\$)?/i);
+  const amountMatch = clean.match(/(?:\$|usd\s*|tusd8\s*|tqday\s*)?(\d+(?:\.\d{1,2})?)\s*(tusd8|tqday|usd|usdc|\$)?/i);
   if (amountMatch) {
     extractedAmount = parseFloat(amountMatch[1]);
-    if (lower.includes("near")) {
-      extractedCurrency = "NEAR";
-    } else if (lower.includes("usdc")) {
-      extractedCurrency = "USDC";
+    if (lower.includes("tqday")) {
+      extractedCurrency = "tQDAY";
+    } else {
+      extractedCurrency = "tUSD8";
     }
   }
 
-  // 2. Extract Destination Chain
-  let targetChain = "NEAR Protocol";
-  let settlementRail: "NEAR Native" | "NEAR Chain Signatures (MPC)" | "NEAR Intent Solver (Model A)" = "NEAR Native";
+  // 2. Extract Destination Chain (Defaults to QDay Aevum Testnet)
+  let targetChain = "QDay Aevum Testnet";
+  let settlementRail: any = "QDay Aevum (tUSD8)";
 
   if (lower.includes("on base") || lower.includes("to base")) {
     targetChain = "Base";
@@ -188,8 +188,8 @@ export function resolveNaturalLanguageIntent(
   const reputationScore = matched ? calculateReputationScore(matched) : 35;
 
   // Resolve target address according to the selected destination chain
-  let targetChainAddress = matched?.nearAccountId || `${recipientQuery.toLowerCase()}.testnet`;
-  if (targetChain === "Base" || targetChain === "Ethereum" || targetChain === "Arbitrum") {
+  let targetChainAddress = matched?.evmAddress || "0x742d35Cc6634C0532925a3b844Bc454e4438f44e";
+  if (targetChain === "Base" || targetChain === "Ethereum" || targetChain === "Arbitrum" || targetChain === "QDay Aevum Testnet") {
     targetChainAddress = matched?.evmAddress || "0x71C8360f3a8b417c805F99D4133A89f07447d251";
   } else if (targetChain === "Bitcoin") {
     targetChainAddress = matched?.bitcoinAddress || "bc1qw508d6qejxtdg4y5r3zarvary0c5xw7kv8f3t4";

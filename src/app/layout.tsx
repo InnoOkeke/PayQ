@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import "@near-wallet-selector/modal-ui/styles.css";
 import { Web3Provider } from "@/components/providers/Web3Provider";
 import { Navbar } from "@/components/navigation/Navbar";
 import { Footer } from "@/components/navigation/Footer";
@@ -10,9 +9,9 @@ import { FloatingCopilot } from "@/components/assistant/FloatingCopilot";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "PaySure — Autonomous Treasury & Counterparty Verification",
+  title: "PayQ — Post-Quantum Stablecoin Invoicing & Confirmation of Payee on QDay Aevum",
   description:
-    "Cryptographic Confirmation of Payee, zero-trust invoice intelligence, and non-custodial multi-chain settlement on NEAR Protocol.",
+    "Cryptographic Confirmation of Payee, zero-trust AI invoice intelligence, and tUSD8 stablecoin settlement on QDay Aevum Testnet.",
 };
 
 export default function RootLayout({

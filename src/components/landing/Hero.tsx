@@ -9,10 +9,10 @@ import {
   AlertCircle,
   ArrowUpRight
 } from "lucide-react";
-import { useNearWallet } from "@/context/NearWalletContext";
+import { useWallet } from "@/context/WalletContext";
 
 export function Hero() {
-  const { isConnected, connect, isConnecting } = useNearWallet();
+  const { isConnected, connect, isConnecting } = useWallet();
   const [activeView, setActiveView] = useState<"cop" | "intent" | "treasury">("cop");
 
   return (
@@ -30,19 +30,19 @@ export function Hero() {
           {/* Minimalist Eyebrow Capsule */}
           <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.08] text-[12px] text-zinc-400 mb-8 whitespace-nowrap">
             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-            <span className="font-medium text-zinc-200">PaySure Core</span>
+            <span className="font-medium text-zinc-200">PayQ Core</span>
             <span className="text-zinc-600">·</span>
-            <span>Institutional Settlement on NEAR</span>
+            <span>tUSD8 Settlement on QDay Aevum L2</span>
           </div>
 
           {/* Apple-Inspired Display Headline */}
           <h1 className="text-4xl sm:text-6xl lg:text-[68px] font-semibold tracking-[-0.04em] leading-[1.04] bg-gradient-to-b from-white via-white to-zinc-400 bg-clip-text text-transparent">
-            Precision settlement for autonomous enterprise.
+            Post-quantum stablecoin settlement for autonomous enterprise.
           </h1>
 
           {/* Executive Subheadline */}
           <p className="mt-6 text-base sm:text-lg lg:text-[19px] text-zinc-400 max-w-2xl font-normal leading-[1.6] tracking-[-0.01em]">
-            Cryptographic Confirmation of Payee, zero-trust invoice intelligence, and programmable treasury guardrails — engineered for instant finality.
+            On-chain Confirmation of Payee, AI invoice intelligence, and programmable tUSD8 treasury guardrails — built on QDay Aevum Testnet.
           </p>
 
           {/* Clean Pill Action Cluster */}
@@ -94,9 +94,9 @@ export function Hero() {
                   <div className="h-2.5 w-2.5 rounded-full bg-white/[0.12]" />
                   <div className="h-2.5 w-2.5 rounded-full bg-white/[0.12]" />
                 </div>
-                <span className="text-xs font-mono text-zinc-400">PaySure Verification Engine</span>
+                <span className="text-xs font-mono text-zinc-400">PayQ Verification Engine</span>
                 <span className="text-zinc-700">·</span>
-                <span className="text-[11px] font-mono text-emerald-400">Nightshade 2.0</span>
+                <span className="text-[11px] font-mono text-emerald-400">QDay Aevum (44005)</span>
               </div>
 
               {/* Apple-Style Segmented Control */}
@@ -184,17 +184,17 @@ export function Hero() {
                           Flagged Target
                         </span>
                         <p className="text-lg font-mono font-medium text-rose-300">
-                          acm3-design.testnet
+                          0x9999...9999 (Spoofed)
                         </p>
                       </div>
                       <div className="grid grid-cols-2 gap-4 pt-4 border-t border-white/[0.06] text-xs">
                         <div>
-                          <span className="text-zinc-500 block">Edit Distance</span>
-                          <span className="text-zinc-200 font-mono font-medium mt-0.5 block">Levenshtein d = 1</span>
+                          <span className="text-zinc-500 block">CoP Contract Check</span>
+                          <span className="text-zinc-200 font-mono font-medium mt-0.5 block">PayQRegistry Mismatch</span>
                         </div>
                         <div>
                           <span className="text-zinc-500 block">Policy Action</span>
-                          <span className="text-rose-400 font-medium mt-0.5 block">Quarantined Pre-Sign</span>
+                          <span className="text-rose-400 font-medium mt-0.5 block">Blocked Pre-Sign</span>
                         </div>
                       </div>
                     </div>
@@ -208,11 +208,11 @@ export function Hero() {
                     <div className="flex items-center gap-3">
                       <span className="text-[11px] font-mono uppercase tracking-wider text-zinc-500">Intent</span>
                       <span className="text-sm font-mono text-white">
-                        &ldquo;Settle $50.00 to John Kennedy on Base from operational liquidity&rdquo;
+                        &ldquo;Pay Acme Design 50 tUSD8 on QDay Aevum for Q4 UI Sprint&rdquo;
                       </span>
                     </div>
                     <Link
-                      href="/pay?recipient=john-kennedy.testnet&amount=50"
+                      href="/pay?recipient=0x742d35Cc6634C0532925a3b844Bc454e4438f44e&amount=50"
                       className="inline-flex items-center gap-1 text-xs font-medium text-white hover:text-zinc-300 whitespace-nowrap"
                     >
                       <span>Run in Console</span>
@@ -223,15 +223,15 @@ export function Hero() {
                   <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                       <span className="text-[11px] text-zinc-500 block">Resolved Beneficiary</span>
-                      <span className="text-sm font-mono font-medium text-white mt-1 block">john-kennedy.testnet</span>
+                      <span className="text-sm font-mono font-medium text-white mt-1 block">0x742d...f44e</span>
                     </div>
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                       <span className="text-[11px] text-zinc-500 block">Settlement Asset</span>
-                      <span className="text-sm font-mono font-medium text-white mt-1 block">50.00 USDC / NEAR</span>
+                      <span className="text-sm font-mono font-medium text-white mt-1 block">50.00 tUSD8</span>
                     </div>
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                       <span className="text-[11px] text-zinc-500 block">Execution Rail</span>
-                      <span className="text-sm font-mono font-medium text-white mt-1 block">Base L2 (MPC Signer)</span>
+                      <span className="text-sm font-mono font-medium text-white mt-1 block">QDay Aevum (44005)</span>
                     </div>
                     <div className="p-4 rounded-xl bg-white/[0.02] border border-white/[0.06]">
                       <span className="text-[11px] text-zinc-500 block">Policy Clearance</span>
@@ -245,8 +245,8 @@ export function Hero() {
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5">
                   <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
                     <span className="text-xs text-zinc-500 block">Single-Transaction Ceiling</span>
-                    <p className="text-2xl font-semibold text-white mt-2 tracking-tight">200.00 NEAR</p>
-                    <span className="text-xs text-zinc-400 mt-2 block">Enforced before wallet signature</span>
+                    <p className="text-2xl font-semibold text-white mt-2 tracking-tight">500.00 tUSD8</p>
+                    <span className="text-xs text-zinc-400 mt-2 block">Enforced on-chain in PayQRegistry</span>
                   </div>
                   <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
                     <span className="text-xs text-zinc-500 block">24-Hour Rolling Velocity</span>
@@ -256,9 +256,9 @@ export function Hero() {
                     </div>
                   </div>
                   <div className="p-5 rounded-xl bg-white/[0.02] border border-white/[0.07]">
-                    <span className="text-xs text-zinc-500 block">Multi-Sig Governance</span>
-                    <p className="text-2xl font-semibold text-white mt-2 tracking-tight">2-of-3 Council</p>
-                    <span className="text-xs text-zinc-400 mt-2 block font-mono">sputnik-dao.testnet</span>
+                    <span className="text-xs text-zinc-500 block">Emergency Killswitch</span>
+                    <p className="text-2xl font-semibold text-white mt-2 tracking-tight">Armed & Ready</p>
+                    <span className="text-xs text-zinc-400 mt-2 block font-mono">Chain ID 44005</span>
                   </div>
                 </div>
               )}
@@ -268,19 +268,19 @@ export function Hero() {
             <div className="grid grid-cols-2 sm:grid-cols-4 border-t border-white/[0.06] bg-white/[0.01] divide-y sm:divide-y-0 sm:divide-x divide-white/[0.06]">
               <div className="px-5 py-3.5">
                 <span className="text-[11px] text-zinc-500 block">Consensus Finality</span>
-                <span className="text-xs font-mono text-zinc-200 mt-0.5 block">~1.1 Seconds</span>
+                <span className="text-xs font-mono text-zinc-200 mt-0.5 block">Sub-Second (Aevum)</span>
               </div>
               <div className="px-5 py-3.5">
-                <span className="text-[11px] text-zinc-500 block">Network Fee</span>
-                <span className="text-xs font-mono text-zinc-200 mt-0.5 block">&lt; $0.0001 USD</span>
+                <span className="text-[11px] text-zinc-500 block">Stablecoin Rail</span>
+                <span className="text-xs font-mono text-zinc-200 mt-0.5 block">tUSD8 (ERC-20, 6 dec)</span>
               </div>
               <div className="px-5 py-3.5">
                 <span className="text-[11px] text-zinc-500 block">Identity Assurance</span>
                 <span className="text-xs font-mono text-zinc-200 mt-0.5 block">4-Tier On-Chain CoP</span>
               </div>
               <div className="px-5 py-3.5">
-                <span className="text-[11px] text-zinc-500 block">Cross-Chain Signing</span>
-                <span className="text-xs font-mono text-zinc-200 mt-0.5 block">Threshold MPC (v1.signer)</span>
+                <span className="text-[11px] text-zinc-500 block">Cryptography</span>
+                <span className="text-xs font-mono text-zinc-200 mt-0.5 block">Post-Quantum L2</span>
               </div>
             </div>
 

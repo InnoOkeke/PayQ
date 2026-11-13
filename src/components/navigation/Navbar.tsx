@@ -15,9 +15,9 @@ import {
   X,
   ArrowUpRight
 } from "lucide-react";
-import { PaySureLogo } from "@/components/brand/Logos";
-import { useNearWallet } from "@/context/NearWalletContext";
-import { NEAR_CONFIG } from "@/lib/near/config";
+import { PayQLogo } from "@/components/brand/Logos";
+import { useWallet } from "@/context/WalletContext";
+import { AEVUM_CONFIG, explorerAddressUrl } from "@/lib/aevum/config";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -27,12 +27,15 @@ export function Navbar() {
     accountId, 
     isConnected, 
     isConnecting, 
+    isWrongNetwork,
     balance, 
+    nativeBalance,
     isFetchingBalance, 
     connect, 
     disconnect, 
+    switchToAevum,
     refreshBalance 
-  } = useNearWallet();
+  } = useWallet();
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -85,14 +88,14 @@ export function Navbar() {
         <div className="flex items-center shrink-0">
           <Link href="/" className="flex items-center gap-3 whitespace-nowrap group">
             <div className="h-9 w-9 rounded-xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.1] flex items-center justify-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] group-hover:border-brand-400/40 transition-all">
-              <PaySureLogo size={22} />
+              <PayQLogo size={22} />
             </div>
             <div className="flex items-center gap-1.5">
               <span className="text-[16px] font-bold tracking-[-0.02em] text-white">
-                PaySure
+                PayQ
               </span>
               <span className="text-[10px] font-mono font-semibold px-1.5 py-0.5 rounded-md bg-brand-500/15 text-brand-300 border border-brand-400/25 leading-none">
-                AI
+                AEVUM
               </span>
             </div>
           </Link>
@@ -139,12 +142,12 @@ export function Navbar() {
           {isLandingPage ? (
             <>
               <a
-                href="https://docs.near.org"
+                href="https://qday.io"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="hidden sm:inline-flex items-center px-3.5 py-1.5 rounded-full text-[13px] font-medium text-slate-300 hover:text-white hover:bg-white/[0.05] transition-all whitespace-nowrap"
               >
-                Docs
+                QDay Docs
               </a>
 
               <Link
@@ -163,7 +166,14 @@ export function Navbar() {
                   disabled={isConnecting}
                   className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold bg-gradient-to-b from-brand-500 to-brand-600 hover:from-brand-400 hover:to-brand-500 text-white shadow-[0_4px_20px_rgba(37,99,235,0.35),inset_0_1px_0_0_rgba(255,255,255,0.25)] transition-all active:scale-[0.98] disabled:opacity-50 whitespace-nowrap"
                 >
-                  <span>{isConnecting ? "Connecting..." : "Connect NEAR Wallet"}</span>
+                  <span>{isConnecting ? "Connecting..." : "Connect Aevum Wallet"}</span>
+                </button>
+              ) : isWrongNetwork ? (
+                <button
+                  onClick={() => switchToAevum()}
+                  className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-[13px] font-semibold bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-400/40 transition-all whitespace-nowrap"
+                >
+                  <span>Switch to Aevum Testnet</span>
                 </button>
               ) : (
                 <div className="relative" ref={dropdownRef}>
@@ -173,10 +183,10 @@ export function Navbar() {
                   >
                     <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(52,211,153,0.8)] shrink-0" />
                     <span className="font-mono text-xs font-medium text-slate-200 truncate max-w-[120px] sm:max-w-[150px]">
-                      {accountId}
+                      {accountId ? `${accountId.slice(0, 6)}...${accountId.slice(-4)}` : ""}
                     </span>
                     <span className="hidden sm:inline-flex items-center px-2.5 py-1 rounded-full bg-white/[0.06] border border-white/[0.06] font-mono text-[11px] font-semibold text-brand-300">
-                      {balance} NEAR
+                      {balance} tUSD8
                     </span>
                     <ChevronDown className={`h-3.5 w-3.5 text-slate-400 transition-transform duration-150 ${dropdownOpen ? "rotate-180" : ""}`} />
                   </button>
@@ -190,7 +200,7 @@ export function Navbar() {
                           </span>
                           <span className="inline-flex items-center gap-1 text-[10px] text-emerald-400 font-mono">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-                            NEAR Testnet
+                            QDay Aevum (44005)
                           </span>
                         </div>
                         <div className="flex items-center justify-between gap-2">
@@ -200,7 +210,7 @@ export function Navbar() {
                           <button
                             onClick={copyAddress}
                             className="text-slate-400 hover:text-white p-1 rounded-md hover:bg-white/[0.06] transition-colors"
-                            title="Copy account ID"
+                            title="Copy address"
                           >
                             {copied ? (
                               <Check className="h-3.5 w-3.5 text-emerald-400" />
@@ -211,12 +221,12 @@ export function Navbar() {
                         </div>
                       </div>
 
-                      <div className="p-3 bg-white/[0.03] rounded-xl mb-2.5 border border-white/[0.06] text-xs">
+                      <div className="p-3 bg-white/[0.03] rounded-xl mb-2.5 border border-white/[0.06] text-xs space-y-1.5">
                         <div className="flex justify-between items-center">
-                          <span className="text-[11px] text-slate-400">Wallet Balance</span>
+                          <span className="text-[11px] text-slate-400">Stablecoin (tUSD8)</span>
                           <div className="flex items-center gap-1.5">
                             <span className="font-mono font-bold text-brand-300 text-xs">
-                              {balance} NEAR
+                              {balance} tUSD8
                             </span>
                             <button
                               onClick={() => refreshBalance()}
@@ -228,17 +238,32 @@ export function Navbar() {
                             </button>
                           </div>
                         </div>
+                        <div className="flex justify-between items-center">
+                          <span className="text-[11px] text-slate-400">Gas (tQDAY)</span>
+                          <span className="font-mono text-slate-200 text-[11px]">
+                            {nativeBalance} tQDAY
+                          </span>
+                        </div>
                       </div>
 
                       <div className="space-y-0.5 text-xs">
                         <a
-                          href={`${NEAR_CONFIG.explorerUrl}/address/${accountId}`}
+                          href={accountId ? explorerAddressUrl(accountId) : AEVUM_CONFIG.explorerUrl}
                           target="_blank"
                           rel="noreferrer"
                           className="flex items-center justify-between px-2.5 py-2 rounded-xl text-slate-300 hover:bg-white/[0.06] hover:text-white transition-colors"
                         >
-                          <span>View on NEARBlocks</span>
+                          <span>View on Aevum Explorer</span>
                           <ExternalLink className="h-3.5 w-3.5 text-slate-400" />
+                        </a>
+                        <a
+                          href={AEVUM_CONFIG.faucetUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="flex items-center justify-between px-2.5 py-2 rounded-xl text-emerald-300 hover:bg-white/[0.06] transition-colors"
+                        >
+                          <span>Claim tUSD8 & tQDAY Faucet</span>
+                          <ExternalLink className="h-3.5 w-3.5 text-emerald-400" />
                         </a>
 
                         <button
