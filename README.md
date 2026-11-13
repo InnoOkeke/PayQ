@@ -26,6 +26,7 @@ Built for the **[Aevum Builder Challenge #1](https://dorahacks.io/hackathon/qday
 | **Block Explorer** | `https://explorer-test.qday.info` |
 | **Native Gas Token** | `tQDAY` (18 decimals) |
 | **Test Stablecoin (`tUSD8`)** | `0x456569838f1d43009A91ebA4263147Afd7233483` (ERC-20, 6 decimals) |
+| **PayQRegistry (Live CoP Contract)** | [`0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21`](https://explorer-test.qday.info/address/0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21) |
 | **Faucet** | `https://faucet.qday.info` (`0xE5074CBbd046AFb491EB8692abD6cF7ECCC6dEE5`) |
 
 ---

@@ -40,9 +40,8 @@ export const AEVUM_CONFIG = {
   tusd8Symbol: "tUSD8",
   nativeSymbol: "tQDAY",
   nativeDecimals: 18,
-  payqRegistryAddress: (process.env.NEXT_PUBLIC_PAYQ_REGISTRY_ADDRESS || "") as
-    | `0x${string}`
-    | "",
+  payqRegistryAddress: (process.env.NEXT_PUBLIC_PAYQ_REGISTRY_ADDRESS ||
+    "0x6e9ba39CedDa49eb2647Aef28ae30da9B005fc21") as `0x${string}` | "",
 };
 
 export const ERC20_ABI = parseAbi([

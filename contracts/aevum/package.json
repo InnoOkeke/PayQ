@@ -5,6 +5,6 @@
   "scripts": {
     "compile": "../../node_modules/.bin/hardhat compile",
     "test": "../../node_modules/.bin/hardhat test",
-    "deploy:aevum": "../../node_modules/.bin/hardhat run scripts/deploy.ts --network aevumTestnet"
+    "deploy:aevum": "../../node_modules/.bin/hardhat run scripts/deploy.mjs --network aevumTestnet"
   }
 }
