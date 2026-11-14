@@ -13,7 +13,9 @@ import {
   Check,
   Menu,
   X,
-  ArrowUpRight
+  ArrowUpRight,
+  Sun,
+  Moon
 } from "lucide-react";
 import { PayQLogo } from "@/components/brand/Logos";
 import { useWallet } from "@/context/WalletContext";
@@ -40,7 +42,30 @@ export function Navbar() {
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
   const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const saved = typeof window !== "undefined" ? localStorage.getItem("payq-theme") : null;
+    if (saved === "light") {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+      setTheme("light");
+    }
+  }, []);
+
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    if (next === "light") {
+      document.documentElement.classList.remove("dark");
+      document.documentElement.classList.add("light");
+    } else {
+      document.documentElement.classList.remove("light");
+      document.documentElement.classList.add("dark");
+    }
+    localStorage.setItem("payq-theme", next);
+  };
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -139,6 +164,15 @@ export function Navbar() {
 
         {/* Right: Session & Primary CTA */}
         <div className="flex items-center gap-2.5 shrink-0 whitespace-nowrap">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            aria-label={theme === "dark" ? "Switch to light mode" : "Switch to dark mode"}
+            title={theme === "dark" ? "Light mode" : "Dark mode"}
+            className="p-2 rounded-full bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.08] text-slate-300 hover:text-white transition-all"
+          >
+            {theme === "dark" ? <Sun className="h-3.5 w-3.5" /> : <Moon className="h-3.5 w-3.5" />}
+          </button>
           {isLandingPage ? (
             <>
               <a

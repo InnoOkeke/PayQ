@@ -17,9 +17,11 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { formatAddress, formatCurrency } from "@/lib/utils";
+import { useToast } from "@/components/ui/ToastProvider";
 
 export default function InvoiceUploadPage() {
   const router = useRouter();
+  const toast = useToast();
   const [file, setFile] = useState<File | null>(null);
   const [extracting, setExtracting] = useState(false);
   const [extractedData, setExtractedData] = useState<any>(null);
@@ -123,7 +125,7 @@ ATTENTION: Notice account address change!`;
 
   const handleSaveInvoice = async (proceedToPay = false) => {
     if (!invoiceNumber || !recipientName || !recipientAddress || !amount) {
-      alert("Please ensure all mandatory fields are completed.");
+      toast.error("Please ensure all mandatory fields are completed.");
       return;
     }
 
@@ -160,7 +162,7 @@ ATTENTION: Notice account address change!`;
 
   const handlePayWithCopilotAfterSave = async () => {
     if (!invoiceNumber || !recipientName || !recipientAddress || !amount) {
-      alert("Please ensure all mandatory fields are completed.");
+      toast.error("Please ensure all mandatory fields are completed.");
       return;
     }
 
@@ -190,11 +192,11 @@ ATTENTION: Notice account address change!`;
           })
         );
       } else {
-        alert(data.error || "Failed to save invoice.");
+        toast.error(data.error || "Failed to save invoice.");
       }
     } catch (err) {
       console.error("Save invoice error:", err);
-      alert("Error saving invoice for Copilot payment.");
+      toast.error("Error saving invoice for Copilot payment.");
     } finally {
       setSaving(false);
     }

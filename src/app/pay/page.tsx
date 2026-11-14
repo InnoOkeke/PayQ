@@ -24,12 +24,14 @@ import { useWallet } from "@/context/WalletContext";
 import { AEVUM_CONFIG, isValidAevumAddress, explorerTxUrl } from "@/lib/aevum/config";
 import { detectChainFromAddress } from "@/lib/recipients";
 import { formatCurrency } from "@/lib/utils";
+import { useToast } from "@/components/ui/ToastProvider";
 
 const SUPPORTED_CHAINS = [
   { id: "aevum", name: "QDay Aevum Testnet", rail: "PayQRegistry (tUSD8)", badge: "AEVUM", color: "text-emerald-400" },
 ];
 
 export default function PayPage() {
+  const toast = useToast();
   const searchParams = useSearchParams();
   const invoiceIdParam = searchParams.get("invoiceId");
   const recipientParam = searchParams.get("recipient");
@@ -364,15 +366,15 @@ export default function PayPage() {
   const handleProceedToReview = (e: React.FormEvent) => {
     e.preventDefault();
     if (!recipient || !isValidRecipient(recipient)) {
-      alert("Please enter a valid recipient account or address.");
+      toast.error("Please enter a valid recipient account or address.");
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid amount.");
+      toast.error("Please enter a valid amount.");
       return;
     }
     if (isInsufficientBalance) {
-      alert(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
+      toast.error(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
       return;
     }
     setPendingError(null);
@@ -385,11 +387,11 @@ export default function PayPage() {
       return;
     }
     if (!recipient || !isValidRecipient(recipient)) {
-      alert("Please enter a valid recipient account or address.");
+      toast.error("Please enter a valid recipient account or address.");
       return;
     }
     if (!amount || parseFloat(amount) <= 0) {
-      alert("Please enter a valid amount.");
+      toast.error("Please enter a valid amount.");
       return;
     }
     if (paymentBlocked) {
@@ -399,7 +401,7 @@ export default function PayPage() {
       return;
     }
     if (isInsufficientBalance) {
-      alert(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
+      toast.error(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
       return;
     }
 
@@ -467,8 +469,9 @@ export default function PayPage() {
         await cancelPendingPayment(actionId);
       }
       console.error("tUSD8 transaction execution error:", err);
-      setPendingError(err.message || "Failed to execute transaction with connected tUSD8 wallet.");
-      alert(err.message || "Failed to execute transaction with connected tUSD8 wallet.");
+      const errMsg = err?.shortMessage || err?.message || "Failed to execute transaction with connected wallet.";
+      setPendingError(errMsg);
+      toast.error(errMsg);
     } finally {
       setIsExecuting(false);
     }

@@ -91,3 +91,58 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(255, 255, 255, 0.25);
 }
+
+/* Adaptive Apple/Material Light Mode */
+html.light body {
+  background: #F5F5F7;
+  color: #1D1D1F;
+}
+
+html.light .min-h-screen {
+  background-color: #F5F5F7 !important;
+  color: #1D1D1F;
+}
+
+html.light header,
+html.light footer {
+  background-color: rgba(255, 255, 255, 0.85) !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+}
+
+html.light [class*="bg-[#090B10]"],
+html.light [class*="bg-navy-900"],
+html.light [class*="bg-navy-950"] {
+  background-color: #FFFFFF !important;
+  border-color: rgba(0, 0, 0, 0.08) !important;
+  box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.06);
+}
+
+html.light [class*="text-white"] {
+  color: #1D1D1F !important;
+}
+
+html.light .bg-brand-600,
+html.light .bg-emerald-600,
+html.light [class*="from-brand-500"] {
+  color: #FFFFFF !important;
+}
+
+html.light .bg-brand-600 *,
+html.light .bg-emerald-600 *,
+html.light [class*="from-brand-500"] * {
+  color: #FFFFFF !important;
+}
+
+html.light [class*="text-slate-300"],
+html.light [class*="text-slate-400"],
+html.light [class*="text-zinc-400"] {
+  color: #515154 !important;
+}
+
+html.light input,
+html.light select,
+html.light textarea {
+  background-color: #F5F5F7 !important;
+  color: #1D1D1F !important;
+  border-color: rgba(0, 0, 0, 0.14) !important;
+}

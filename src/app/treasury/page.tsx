@@ -227,30 +227,28 @@ export default function TreasuryPage() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pb-6 border-b border-navy-800">
         <div>
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-brand-400">
-              On-Chain Smart Contract Guardrails
-            </span>
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
+            Treasury Guardrails
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-400 mt-1 flex flex-wrap items-center gap-2">
+            <span>On-chain limits enforced per wallet on QDay Aevum</span>
+            <span className="text-slate-600">·</span>
             <a
               href={explorerAddressUrl(AEVUM_CONFIG.payqRegistryAddress)}
               target="_blank"
               rel="noreferrer"
-              className="text-xs font-mono text-emerald-400 hover:underline inline-flex items-center gap-1"
+              className="font-mono text-xs text-emerald-400 hover:underline inline-flex items-center gap-1"
             >
-              <span>PayQRegistry ({AEVUM_CONFIG.payqRegistryAddress.slice(0, 8)}...)</span>
+              <span>Contract {AEVUM_CONFIG.payqRegistryAddress.slice(0, 6)}...{AEVUM_CONFIG.payqRegistryAddress.slice(-4)}</span>
               <ExternalLink className="h-3 w-3" />
             </a>
-          </div>
-          <h1 className="text-2xl sm:text-3xl font-extrabold text-white tracking-tight">
-            Treasury Guardrails &amp; Security Policy Engine
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400 mt-1">
-            Multi-wallet on-chain guardrails enforced by PayQRegistry.sol on QDay Aevum Testnet (Chain ID 44005).
             {accountId && (
-              <span className="ml-2 font-mono text-[11px] text-emerald-400">
-                {isCustomPolicy ? "Custom Wallet Policy Active" : "Using Default Policy (Save to Customize)"}
-              </span>
+              <>
+                <span className="text-slate-600">·</span>
+                <span className="font-mono text-xs text-slate-300">
+                  {isCustomPolicy ? "Custom Wallet Policy" : "Default Policy"}
+                </span>
+              </>
             )}
           </p>
           {lastTxHash && (
@@ -260,7 +258,7 @@ export default function TreasuryPage() {
               rel="noreferrer"
               className="mt-2 inline-flex items-center gap-1.5 text-xs font-mono text-emerald-400 hover:underline"
             >
-              <span>Latest On-Chain Policy Tx: {lastTxHash.slice(0, 14)}...</span>
+              <span>Latest Policy Tx: {lastTxHash.slice(0, 14)}...</span>
               <ExternalLink className="h-3 w-3" />
             </a>
           )}

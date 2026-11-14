@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { detectChainFromAddress } from "@/lib/recipients";
 import { useWallet } from "@/context/WalletContext";
+import { useToast } from "@/components/ui/ToastProvider";
 
 const SUPPORTED_CHAINS = [
   { id: "tUSD8", name: "QDay Aevum", rail: "PayQRegistry", badge: "tUSD8" },
@@ -23,6 +24,7 @@ const SUPPORTED_CHAINS = [
 export default function NewInvoicePage() {
   const router = useRouter();
   const { isConnected, balance } = useWallet();
+  const toast = useToast();
 
   const [invoiceNumber, setInvoiceNumber] = useState(
     "INV-" + Math.floor(1000 + Math.random() * 9000)
@@ -79,17 +81,17 @@ export default function NewInvoicePage() {
 
   const handleSubmit = async (proceedToPay = false) => {
     if (!invoiceNumber || !recipientName || !recipientAddress || !amount) {
-      alert("Please fill in all required fields.");
+      toast.error("Please fill in all required fields.");
       return;
     }
 
     if (recipientAddress.trim().length < 3) {
-      alert("Please enter a valid QDay Aevum 0x recipient address.");
+      toast.error("Please enter a valid QDay Aevum 0x recipient address.");
       return;
     }
 
     if (proceedToPay && isInsufficientBalance) {
-      alert(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
+      toast.error(`Insufficient funds. Your available balance is ${balance} tUSD8.`);
       return;
     }
 
@@ -117,11 +119,11 @@ export default function NewInvoicePage() {
           router.push("/invoices");
         }
       } else {
-        alert(data.error || "Failed to create invoice.");
+        toast.error(data.error || "Failed to create invoice.");
       }
     } catch (err: any) {
       console.error(err);
-      alert("Error saving invoice.");
+      toast.error("Error saving invoice.");
     } finally {
       setSaving(false);
     }
