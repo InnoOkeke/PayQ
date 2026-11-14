@@ -92,105 +92,120 @@ body {
   background: rgba(255, 255, 255, 0.25);
 }
 
-/* Light Mode Support (Apple/Google Daylight Surface) */
+/* Light Mode Support — 4-Tier Apple / Stripe Daylight Color System */
 html.light {
   color-scheme: light;
 }
 
-html.light body {
-  background-color: #F5F5F7 !important;
-  color: #1D1D1F !important;
-}
-
-html.light .min-h-screen {
-  background-color: #F5F5F7 !important;
-  color: #1D1D1F;
+/* Tier 0: Cool Porcelain Page Canvas (#F1F5F9) */
+html.light body,
+html.light .min-h-screen,
+html.light section[class*="bg-[#050507]"],
+html.light div.min-h-screen[class*="bg-[#050507]"],
+html.light [class*="bg-[#070B14]"] {
+  background-color: #F1F5F9 !important;
+  color: #0F172A !important;
 }
 
 html.light ::-webkit-scrollbar-track {
-  background: #F5F5F7;
+  background: #F1F5F9;
 }
 
 html.light ::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.18);
+  background: #CBD5E1;
 }
 
 html.light ::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.3);
+  background: #94A3B8;
 }
 
-/* Header & footer chrome */
+/* Frosted Glass Header & Footer Chrome */
 html.light header,
 html.light footer {
   background-color: rgba(255, 255, 255, 0.88) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  border-color: #E2E8F0 !important;
+  backdrop-filter: blur(20px) saturate(180%);
 }
 
-/* Page & section canvas backgrounds */
-html.light [class*="bg-[#050507]"],
-html.light [class*="bg-[#070B14]"],
+/* Tier 1: Pure White Elevated Cards, Bento Surfaces, Modals & Dropdowns (#FFFFFF) */
 html.light [class*="bg-[#090B10]"],
-html.light [class*="bg-navy-950"] {
-  background-color: #F5F5F7 !important;
-}
-
-/* Elevated card, modal, navbar dropdown & panel surfaces */
 html.light [class*="bg-[#05070B]"],
 html.light [class*="bg-[#0A0E17]"],
 html.light [class*="bg-[#0D111A]"],
 html.light [class*="bg-[#0E131F]"],
 html.light [class*="bg-[#11141C]"],
-html.light [class*="bg-navy-900"] {
-  background-color: rgba(255, 255, 255, 0.94) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+html.light [class*="bg-navy-900"],
+html.light .apple-card,
+html.light .glass-card,
+html.light .glass-panel,
+html.light .surface-elevated {
+  background-color: #FFFFFF !important;
+  border-color: #E2E8F0 !important;
+  box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.04) !important;
 }
 
-/* Secondary / inner box surfaces */
-html.light [class*="bg-navy-850"],
-html.light [class*="bg-navy-800"],
-html.light [class*="bg-navy-750"],
+html.light [class*="bg-[#090B10]"]:hover,
+html.light .glass-card:hover {
+  border-color: #CBD5E1 !important;
+  box-shadow: 0 16px 36px -10px rgba(15, 23, 42, 0.09), 0 2px 6px 0 rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Soften heavy dark-mode window shadows in light mode */
+html.light [class*="shadow-[0_32px"] {
+  box-shadow: 0 24px 64px -16px rgba(15, 23, 42, 0.09), 0 4px 16px -2px rgba(15, 23, 42, 0.04) !important;
+}
+
+/* Tier 2: Recessed Inner Wells, Code Strips & Sub-Cards (#F8FAFC) */
+html.light [class*="bg-navy-950"],
+html.light div [class*="bg-[#050507]"],
+html.light [class*="bg-white/[0.01]"],
+html.light [class*="bg-white/[0.02]"],
+html.light [class*="bg-white/[0.03]"],
 html.light [class*="bg-black/20"],
 html.light [class*="bg-black/30"],
 html.light [class*="bg-black/40"],
 html.light [class*="bg-black/50"],
 html.light [class*="bg-black/60"] {
-  background-color: #F2F2F7 !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
+  background-color: #F8FAFC !important;
+  border-color: #E2E8F0 !important;
 }
 
-/* Subtle translucent fills & borders designed for dark mode */
-html.light [class*="bg-white/[0."] {
-  background-color: rgba(0, 0, 0, 0.035) !important;
+/* Tier 3: Interactive Secondary Buttons, Icon Containers & Segmented Tracks (#EEF2F6) */
+html.light [class*="bg-navy-850"],
+html.light [class*="bg-navy-800"],
+html.light [class*="bg-navy-750"],
+html.light [class*="bg-white/[0.04]"],
+html.light [class*="bg-white/[0.05]"],
+html.light [class*="bg-white/[0.06]"],
+html.light [class*="bg-white/[0.07]"],
+html.light [class*="bg-white/[0.08]"],
+html.light [class*="bg-white/[0.09]"],
+html.light [class*="bg-white/[0.1"],
+html.light [class*="bg-white/[0.12]"] {
+  background-color: #EEF2F6 !important;
+  border-color: #CBD5E1 !important;
 }
 
+html.light [class*="bg-navy-800"]:hover,
+html.light [class*="bg-navy-750"]:hover,
+html.light a[class*="bg-white/[0.04]"]:hover,
+html.light button[class*="bg-white/[0.04]"]:hover {
+  background-color: #E2E8F0 !important;
+}
+
+/* Crisp Slate Hairline Borders */
 html.light [class*="border-white/"],
 html.light [class*="border-navy-"] {
-  border-color: rgba(0, 0, 0, 0.09) !important;
+  border-color: #E2E8F0 !important;
 }
 
-/* Glass cards & panels */
-html.light .apple-card,
-html.light .glass-card,
-html.light .glass-panel,
-html.light .surface-elevated {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border-color: rgba(0, 0, 0, 0.08) !important;
-  box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.06), 0 1px 3px 0 rgba(0, 0, 0, 0.04) !important;
-}
-
-html.light .glass-card:hover {
-  background: rgba(255, 255, 255, 1) !important;
-  border-color: rgba(59, 130, 246, 0.35) !important;
-  box-shadow: 0 10px 28px -4px rgba(0, 0, 0, 0.09), 0 2px 6px 0 rgba(0, 0, 0, 0.04) !important;
-}
-
-/* Gradient display headlines (e.g. Hero from-white via-white to-zinc-400) */
+/* Display Gradient Headlines (Deep Optical Slate Gradient) */
 html.light .bg-clip-text.text-transparent {
-  background-image: linear-gradient(180deg, #1D1D1F 0%, #48484A 100%) !important;
+  background-image: linear-gradient(180deg, #0F172A 0%, #334155 100%) !important;
   -webkit-text-fill-color: transparent !important;
 }
 
-/* Primary text */
+/* Typography Hierarchy — Optical Slate Ink */
 html.light .text-white,
 html.light [class*="text-[#F5F5F7]"],
 html.light .text-slate-50,
@@ -199,91 +214,102 @@ html.light .text-slate-200,
 html.light .text-zinc-50,
 html.light .text-zinc-100,
 html.light .text-zinc-200 {
-  color: #1D1D1F !important;
+  color: #0F172A !important;
 }
 
-/* Secondary body text */
 html.light .text-slate-300,
 html.light .text-slate-400,
 html.light .text-zinc-300,
 html.light .text-zinc-400 {
-  color: #48484A !important;
+  color: #475569 !important;
 }
 
-/* Muted / caption text */
 html.light .text-slate-500,
+html.light .text-slate-600,
 html.light .text-zinc-500,
-html.light .text-zinc-600 {
-  color: #6E6E73 !important;
+html.light .text-zinc-600,
+html.light .text-zinc-700 {
+  color: #64748B !important;
 }
 
-/* High-contrast semantic accent text on light backgrounds */
+/* High-Contrast Daylight Semantic Accents */
 html.light .text-emerald-100,
 html.light .text-emerald-200,
 html.light .text-emerald-300,
 html.light .text-emerald-400 {
-  color: #047857 !important;
+  color: #059669 !important;
 }
 
 html.light .text-brand-200,
 html.light .text-brand-300,
 html.light .text-brand-400 {
-  color: #1D4ED8 !important;
+  color: #2563EB !important;
 }
 
 html.light .text-amber-200,
 html.light .text-amber-300,
 html.light .text-amber-400 {
-  color: #B45309 !important;
+  color: #D97706 !important;
 }
 
 html.light .text-rose-100,
 html.light .text-rose-200,
 html.light .text-rose-300,
 html.light .text-rose-400 {
-  color: #BE123C !important;
+  color: #E11D48 !important;
 }
 
 html.light .text-cyan-200,
 html.light .text-cyan-300,
 html.light .text-cyan-400 {
-  color: #0E7490 !important;
+  color: #0284C7 !important;
 }
 
-/* Tinted status & alert banners in light mode */
+/* Rich Pastel Status Banners & Tinted Badges */
 html.light [class*="bg-emerald-950"],
-html.light [class*="bg-emerald-500/1"] {
-  background-color: rgba(16, 185, 129, 0.1) !important;
-  border-color: rgba(5, 150, 105, 0.25) !important;
+html.light [class*="bg-emerald-500/1"],
+html.light [class*="bg-emerald-500/[0."] {
+  background-color: #ECFDF5 !important;
+  border-color: #A7F3D0 !important;
+}
+
+html.light [class*="bg-brand-500/1"],
+html.light [class*="bg-brand-500/[0."],
+html.light [class*="bg-blue-500/1"] {
+  background-color: #EFF6FF !important;
+  border-color: #BFDBFE !important;
 }
 
 html.light [class*="bg-amber-950"],
-html.light [class*="bg-amber-500/1"] {
-  background-color: rgba(245, 158, 11, 0.12) !important;
-  border-color: rgba(217, 119, 6, 0.28) !important;
+html.light [class*="bg-amber-500/1"],
+html.light [class*="bg-amber-500/[0."] {
+  background-color: #FFFBEB !important;
+  border-color: #FDE68A !important;
 }
 
 html.light [class*="bg-rose-950"],
-html.light [class*="bg-rose-500/1"] {
-  background-color: rgba(244, 63, 94, 0.1) !important;
-  border-color: rgba(225, 29, 72, 0.25) !important;
+html.light [class*="bg-rose-500/1"],
+html.light [class*="bg-rose-500/[0."] {
+  background-color: #FFF1F2 !important;
+  border-color: #FECDD3 !important;
 }
 
-/* Invert white elements (CTA pills, active tab underlines, progress fills) to crisp dark charcoal */
+/* Primary Dark Slate CTA Pills & Active Indicators (.bg-white) */
 html.light .bg-white {
-  background-color: #1D1D1F !important;
+  background-color: #0F172A !important;
 }
 
 html.light .bg-white.text-black,
 html.light .bg-white.text-black * {
   color: #FFFFFF !important;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
 }
 
 html.light .bg-white.text-black:hover {
-  background-color: #3A3A3C !important;
+  background-color: #1E293B !important;
 }
 
-/* Keep white text inside solid brand/accent buttons & badges */
+/* Keep White Text Inside Solid Brand/Accent Buttons & Badges */
 html.light .bg-brand-600,
 html.light .bg-brand-600 *,
 html.light .bg-brand-500,
@@ -299,11 +325,19 @@ html.light [class*="from-brand-500"] * {
   color: #FFFFFF !important;
 }
 
-/* Form controls */
+/* Form Controls */
 html.light input,
 html.light select,
 html.light textarea {
-  background-color: #F5F5F7 !important;
-  color: #1D1D1F !important;
-  border-color: rgba(0, 0, 0, 0.14) !important;
+  background-color: #F8FAFC !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+
+html.light input:focus,
+html.light select:focus,
+html.light textarea:focus {
+  background-color: #FFFFFF !important;
+  border-color: #2563EB !important;
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12) !important;
 }
