@@ -112,9 +112,10 @@ export function Navbar() {
         {/* Left: Brand Identity */}
         <div className="flex items-center shrink-0">
           <Link href="/" className="flex items-center gap-3 whitespace-nowrap group">
-            <div className="h-9 w-9 rounded-xl bg-gradient-to-b from-white/[0.08] to-white/[0.02] border border-white/[0.1] flex items-center justify-center shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)] group-hover:border-brand-400/40 transition-all">
-              <PayQLogo size={22} />
-            </div>
+            <PayQLogo
+              size={36}
+              className="rounded-xl shadow-sm group-hover:scale-[1.03] transition-transform"
+            />
             <div className="flex items-center gap-1.5">
               <span className="text-[16px] font-bold tracking-[-0.02em] text-white">
                 PayQ

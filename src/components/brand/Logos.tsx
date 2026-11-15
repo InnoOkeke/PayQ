@@ -6,52 +6,19 @@ interface LogoProps {
 }
 
 /**
- * PayQ Official Brand Logo: "The Quantum Gateway"
- * Dual convergent fintech chevrons focusing into a bright central AI routing node.
- * Represents post-quantum security on QDay Aevum, Confirmation of Payee, and instant tUSD8 settlement.
+ * PayQ Official Brand Logo
+ * 512x512 PNG monogram rendered cleanly across navigation, footer, and AI Copilot surfaces.
  */
-export function PayQLogo({ className = "h-9 w-9", size = 36 }: LogoProps) {
+export function PayQLogo({ className = "rounded-xl", size = 36 }: LogoProps) {
   return (
-    <svg
+    <img
+      src="/payq-logo.png"
+      alt="PayQ Logo"
       width={size}
       height={size}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-      className={className}
-    >
-      <defs>
-        <linearGradient id="gateGrad1" x1="15" y1="20" x2="65" y2="80" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#3B82F6" />
-          <stop offset="100%" stopColor="#1D4ED8" />
-        </linearGradient>
-        <linearGradient id="gateGrad2" x1="35" y1="20" x2="85" y2="80" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#06B6D4" />
-          <stop offset="100%" stopColor="#3B82F6" />
-        </linearGradient>
-      </defs>
-
-      {/* Left Chevron (Verification & Routing) */}
-      <path
-        d="M24 28L44 48L24 68"
-        stroke="url(#gateGrad1)"
-        strokeWidth="9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Right Chevron (Settlement Execution) */}
-      <path
-        d="M48 28L68 48L48 68"
-        stroke="url(#gateGrad2)"
-        strokeWidth="9"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      {/* Center Intelligence Node */}
-      <circle cx="78" cy="48" r="5" fill="#38BDF8" />
-    </svg>
+      style={{ width: size, height: size }}
+      className={`object-contain shrink-0 select-none ${className}`}
+    />
   );
 }
 
