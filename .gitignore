@@ -22,5 +22,6 @@ typechain-types
 .DS_Store
 *.pem
 *.tsbuildinfo
+docs/
 
 backend/prisma/schema.prisma
