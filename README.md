@@ -6,6 +6,18 @@ Built for the **[Aevum Builder Challenge #1](https://dorahacks.io/hackathon/qday
 
 ---
 
+## Project Overview & Problem Statement
+
+Stablecoin treasury operations and AI-assisted payments face three critical vulnerabilities:
+
+1. **Irreversible Address Spoofing & Lookalike Fraud:** A single wrong hex character, homoglyph substitution, or mismatched payee name causes permanent capital loss prior to signing.
+2. **Unconstrained Wallet & Agent Spending:** Standard EVM wallets expose full token balances without programmable per-transaction limits, rolling 24-hour velocity thresholds, or instant emergency circuit breakers.
+3. **Manual Invoice Workflows & Isolated AI Agents:** Finance teams still copy vendor amounts and addresses out of PDF/image invoices manually, while autonomous AI agents lack an on-chain identity and reputation standard to discover and hire trusted verification/settlement tools.
+
+**PayQ** solves all three by combining **on-chain Confirmation of Payee (`PayQRegistry.sol`)**, **multi-wallet programmable `tUSD8` treasury guardrails**, **multimodal AI invoice OCR & in-chat payment execution**, and **ERC-8004 agent registration (`PayQAgentRegistry.sol`, Agent `#1`)** natively on **QDay Aevum Testnet**.
+
+---
+
 ## Hackathon Track Alignment
 
 - **Confirmation of Payee (`PayQRegistry.sol`)**: On-chain directory binding EVM addresses to verified legal entities with 4 safety tiers (`VERIFIED`, `WARNING`, `UNVERIFIED`, `MISMATCH`), preventing lookalike/address-spoofing invoice fraud.
@@ -45,16 +57,50 @@ Because PayQ follows the **ERC-8004** standard (`registration-v1` + `eip155:4400
 
 ---
 
-## Architecture
+## System Architecture
 
 ```mermaid
 flowchart TD
-    UI["PayQ Web Console (Next.js 14 + wagmi + viem)"] --> API["Intent & CoP Verification APIs"]
-    UI --> WALLET["EVM Wallet (Chain ID 44005)"]
-    API --> COP["Confirmation of Payee & Policy Engine"]
-    WALLET --> REG["PayQRegistry.sol (QDay Aevum Testnet)"]
+    USER["User / Finance Operator"] --> UI["Next.js 14 Console (React + wagmi + viem)"]
+    EXT["External AI Agents / Swarms"] -->|"GET /api/agent & /api/agent/mcp"| AGENT["ERC-8004 & MCP Tool Gateway"]
+    UI --> API["Next.js API Routes (Invoices, Intents, CoP, Payments)"]
+    API --> AI["Gemini / OpenAI (Invoice OCR & NL Intent Copilot)"]
+    API --> DB["Neon PostgreSQL (Prisma ORM)"]
+    AGENT --> API
+    UI --> WALLET["Connected EVM Wallet (QDay Aevum 44005)"]
+    WALLET --> REG["PayQRegistry.sol (CoP + Per-Wallet Guardrails)"]
     REG --> TUSD8["tUSD8 ERC-20 Settlement (0x4565...3483)"]
+    WALLET --> ERC8004["PayQAgentRegistry.sol (ERC-8004 Agent #1)"]
 ```
+
+---
+
+## Core Workflows
+
+1. **On-Chain Confirmation of Payee (CoP)**
+   - Before any transfer is signed, PayQ checks the target address and payee name against `PayQRegistry.sol` on QDay Aevum and the verified recipient directory in Neon PostgreSQL.
+   - Computes Levenshtein edit distance and homoglyph/lookalike similarity, classifying each target as `VERIFIED`, `WARNING`, `UNVERIFIED`, or `MISMATCH`.
+2. **Multimodal Invoice OCR to `tUSD8` Settlement**
+   - Upload PDF or image invoices on `/invoices/upload`; multimodal AI extracts vendor, line items, currency, amount, and destination address.
+   - PayQ validates the extracted recipient via CoP, submits the `tUSD8` transfer on QDay Aevum, records the transaction hash, and generates a downloadable PDF audit receipt (`jspdf`).
+3. **Natural-Language AI Copilot & Direct In-Chat Payments**
+   - Users type commands like *"Send 25 tUSD8 to Polimaf"* in the floating PayQ AI Copilot.
+   - The intent compiler resolves recipients exclusively from the live database and on-chain registry (no hardcoded mock fallbacks), runs CoP + guardrail checks, and lets connected users sign and execute the payment directly inside the chat panel.
+4. **Multi-Wallet Programmable Treasury Guardrails**
+   - On `/treasury`, any connected wallet can configure and enforce its own on-chain policy in `PayQRegistry.sol` (`updateMyGuardrails`, `setMyPaused`): per-transaction cap (`500 tUSD8` default), 24-hour rolling velocity limit (`2,500 tUSD8` default), and an instant emergency pause/killswitch.
+5. **ERC-8004 Agent-to-Agent Discovery & Tool Hiring**
+   - External agents query `PayQAgentRegistry.tokenURI(1)` and `/api/agent` to verify PayQ Copilot's on-chain identity and reputation (`getSummary(1)`), then invoke its CoP and settlement tools via `POST /api/agent` or `GET /api/agent/mcp`.
+
+---
+
+## Technologies Used
+
+| Layer | Technologies |
+| :--- | :--- |
+| **Blockchain & Smart Contracts** | QDay Aevum Testnet (`44005`), Solidity, Hardhat, OpenZeppelin, `wagmi`, `viem` |
+| **Frontend** | Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS, Framer Motion, Lucide React, jsPDF |
+| **Backend & Database** | Next.js API Routes, Prisma ORM, PostgreSQL (Neon), Zod |
+| **AI & Agent Standards** | Google Gemini (`@google/generative-ai`), OpenAI SDK (`openai`), ERC-8004 (`registration-v1`), Model Context Protocol (MCP) |
 
 ---
 
@@ -75,8 +121,6 @@ PayQ/
 │       │   ├── PayQRegistry.test.ts
 │       │   └── PayQAgentRegistry.test.ts
 │       └── hardhat.config.ts
-├── docs/
-│   └── AEVUM_HACKATHON.md         # Aevum Builder Challenge #1 reference
 ├── prisma/
 │   └── schema.prisma              # PostgreSQL schema (tUSD8 / Chain ID 44005)
 └── src/
